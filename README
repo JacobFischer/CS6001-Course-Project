@@ -1,0 +1,38 @@
+dumbaes is a really dumb implementation of AES-128.
+
+It's a class project. It should give you the right answer, but it is not fit for
+real world use. The implementation is slow and stupid. It's vulnerable to all
+sorts of side-channel attacks. Don't use it.
+
+Requirements for tarball builds:
+
+ * A C++14 compiler for binary literals. (GCC 5 should work. Tested with GCC 6.)
+ * GLib >= 2.32
+ * That's it!
+
+Additional requirements for builds from git:
+
+ * autoconf, automake, libtool
+ * A quite recent version of autoconf-archive (uses macros added in 2015)
+
+Usage:
+
+# If building from a tarball:
+./configure
+# Build the code:
+make
+# Running the tests would be a dandy swell idea:
+make check
+# You can run it from the source directory, but if you want to install it:
+sudo make install
+# To run it from the source directory:
+src/dumbaes
+
+If you're building from git, you need to run autogen.sh rather than configure.
+
+-Werror is enabled for builds from git. The recommended way to turn it off if
+you hit compiler warnings is to pass --disable-Werror to configure.
+
+There is no provision for user input. That is, the program is basically useless
+as-is. It is intended to be used for homework projects by modifying main() to
+perform the math you need. Yes, I know that sucks.

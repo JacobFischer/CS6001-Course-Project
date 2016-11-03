@@ -38,10 +38,6 @@ using namespace dumbaes;
  * "user input." Put your input here and recompile the file.
  */
 int main() {
-    // TODO: Implement division?
-    // * Cannot do problem 1 without it
-    // * Required for complete answers to problem 2 and problem 4
-
     // Homework 3 problem 2
     // Default characteristic and IP are large enough to avoid mod operations.
     {
@@ -51,6 +47,7 @@ int main() {
         std::printf("%x + %x = %x\n", p1.value(), p2.value(), (p1 + p2).value());
         std::printf("%x - %x = %x\n", p1.value(), p2.value(), (p1 - p2).value());
         std::printf("%x * %x = %x\n", p1.value(), p2.value(), (p1 * p2).value());
+        std::printf("%x / %x = %x\n", p1.value(), p2.value(), (p1 / p2).value());
         std::printf("\n");
     }
 
@@ -80,10 +77,12 @@ int main() {
         std::printf("%x + %x = %x\n", p1.value(), p2.value(), (p1 + p2).value());
         std::printf("%x - %x = %x\n", p1.value(), p2.value(), (p1 - p2).value());
         std::printf("%x * %x = %x\n", p1.value(), p2.value(), (p1 * p2).value());
+        std::printf("%x / %x = %x\n", p1.value(), p2.value(), (p1 / p2).value());
         std::printf("With irreducible polynomial 1101:\n");
         std::printf("%x + %x = %x\n", p3.value(), p4.value(), (p3 + p4).value());
         std::printf("%x - %x = %x\n", p3.value(), p4.value(), (p3 - p4).value());
         std::printf("%x * %x = %x\n", p3.value(), p4.value(), (p3 * p4).value());
+        std::printf("%x / %x = %x\n", p3.value(), p4.value(), (p3 / p4).value());
         std::printf("\n");
     }
 

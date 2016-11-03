@@ -54,6 +54,7 @@ class Polynomial {
     Polynomial& operator+=(const Polynomial&);
     Polynomial& operator-=(const Polynomial&);
     Polynomial& operator*=(const Polynomial&);
+    Polynomial& operator/=(const Polynomial&);
 
     static const uint16_t aes_irreducible_polynomial = 0b100011011;
 
@@ -69,6 +70,7 @@ Polynomial multiplicative_inverse(const Polynomial&);
 Polynomial operator+(Polynomial, const Polynomial&);
 Polynomial operator-(Polynomial, const Polynomial&);
 Polynomial operator*(Polynomial, const Polynomial&);
+Polynomial operator/(Polynomial, const Polynomial&);
 
 bool operator==(const Polynomial&, const Polynomial&);
 bool operator!=(const Polynomial&, const Polynomial&);

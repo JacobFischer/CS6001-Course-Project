@@ -107,6 +107,11 @@ Polynomial& Polynomial::operator*=(const Polynomial& rhs) {
     return *this;
 }
 
+Polynomial& Polynomial::operator/=(const Polynomial& rhs) {
+    *this *= multiplicative_inverse(rhs);
+    return *this;
+}
+
 Polynomial operator+(Polynomial lhs, const Polynomial& rhs) {
     lhs += rhs;
     return lhs;
@@ -119,6 +124,11 @@ Polynomial operator-(Polynomial lhs, const Polynomial& rhs) {
 
 Polynomial operator*(Polynomial lhs, const Polynomial& rhs) {
     lhs *= rhs;
+    return lhs;
+}
+
+Polynomial operator/(Polynomial lhs, const Polynomial& rhs) {
+    lhs /= rhs;
     return lhs;
 }
 

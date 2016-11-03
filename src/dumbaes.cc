@@ -54,7 +54,7 @@ static Block state_to_block(State&& state)
     return block;
 }
 
-Block encrypt_block(const Block& block, const Block& key)
+Block encrypt_block(const Block& block, const Key& key)
 {
     State initial_state = block_to_state(block);
     return state_to_block(std::move(initial_state));

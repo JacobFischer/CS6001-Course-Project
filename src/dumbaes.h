@@ -34,14 +34,17 @@
 
 namespace dumbaes {
 
-// Note: 16 bytes * 8 bits/byte = 128 bits
+// 16 bytes * 8 bits/byte = 128 bits. Same for all versions of AES.
 using Block = std::array<uint8_t, 16>;
+
+// This would need to be changed to 24 or 32 for AES-192 or AES-256.
+using Key = std::array<uint8_t, 16>;
 
 /**
  * It encrypts one block of data with the specified key. This probably shouldn't
  * ever be used directly by applications; it's intended for use by block cipher
  * mode implementations.
  */
-Block encrypt_block(const Block& block, const Block& key);
+Block encrypt_block(const Block& block, const Key& key);
 
 }

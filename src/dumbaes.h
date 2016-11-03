@@ -47,4 +47,11 @@ using Key = std::array<uint8_t, 16>;
  */
 Block encrypt_block(const Block& block, const Key& key);
 
+/**
+ * It decrypts one block of data with the specified key. This probably shouldn't
+ * ever be used directly by applications; it's intended for use by block cipher
+ * mode implementations.
+ */
+Block decrypt_block(const Block& block, const Key& key);
+
 }

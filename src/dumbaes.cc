@@ -78,12 +78,27 @@ static void sub_bytes(State& state)
     // TODO
 }
 
+static void inverse_sub_bytes(State& state)
+{
+    // TODO
+}
+
 static void shift_rows(State& state)
 {
     // TODO
 }
 
+static void inverse_shift_rows(State& state)
+{
+    // TODO
+}
+
 static void mix_columns(State& state)
+{
+    // TODO
+}
+
+static void inverse_mix_columns(State& state)
 {
     // TODO
 }
@@ -110,6 +125,27 @@ Block encrypt_block(const Block& block, const Key& key)
     sub_bytes(state);
     shift_rows(state);
     add_round_key(state, std::move(key_schedule[num_rounds]));
+
+    return state_to_block(std::move(state));
+}
+
+// See FIPS 197, Fig. 12
+Block decrypt_block(const Block& block, const Key& key)
+{
+    State state = block_to_state(block);
+    KeySchedule key_schedule = compute_key_schedule(key);
+    add_round_key(state, std::move(key_schedule[num_rounds]));
+
+    for (int i = num_rounds - 1; i > 0; i--) {
+        inverse_shift_rows(state);
+        inverse_sub_bytes(state);
+        add_round_key(state, std::move(key_schedule[i]));
+        inverse_mix_columns(state);
+    }
+
+    inverse_shift_rows(state);
+    inverse_sub_bytes(state);
+    add_round_key(state, std::move(key_schedule[0]));
 
     return state_to_block(std::move(state));
 }

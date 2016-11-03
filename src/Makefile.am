@@ -12,6 +12,8 @@ dumbaes_LDADD = libdumbaes.la
 dumbaes_LDFLAGS = $(WARN_LDFLAGS)
 
 libdumbaes_la_SOURCES = \
+	dumbaes.cc	\
+	dumbaes.h	\
 	polynomial.cc	\
 	polynomial.h
 

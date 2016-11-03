@@ -97,7 +97,7 @@ static void add_round_key(State& state, RoundKey&& round_key)
 Block encrypt_block(const Block& block, const Key& key)
 {
     State state = block_to_state(block);
-    auto key_schedule = compute_key_schedule(key);
+    KeySchedule key_schedule = compute_key_schedule(key);
     add_round_key(state, std::move(key_schedule[0]));
 
     for (int i = 1; i < num_rounds; i++) {

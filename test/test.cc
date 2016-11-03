@@ -35,7 +35,8 @@
 using namespace dumbaes;
 
 // Test cases from https://en.wikipedia.org/wiki/Finite_field_arithmetic#Addition_and_subtraction
-static void add_subtract1() {
+static void add_subtract1()
+{
     Polynomial p1{0b1011};
     Polynomial p2{0b1100};
 
@@ -43,7 +44,8 @@ static void add_subtract1() {
     g_assert_cmpuint((p1 - p2).value(), ==, 0b0111);
 }
 
-static void add_subtract2() {
+static void add_subtract2()
+{
     Polynomial p1{0b00010100};
     Polynomial p2{0b01000100};
 
@@ -51,7 +53,8 @@ static void add_subtract2() {
     g_assert_cmpuint((p1 - p2).value(), ==, 0b01010000);
 }
 
-static void add_subtract3() {
+static void add_subtract3()
+{
     Polynomial p1{0b011};
     Polynomial p2{0b101};
 
@@ -59,7 +62,8 @@ static void add_subtract3() {
     g_assert_cmpuint((p1 - p2).value(), ==, 0b110);
 }
 
-static void add_subtract4() {
+static void add_subtract4()
+{
     Polynomial p1{0b1010};
     Polynomial p2{0b0101};
     Polynomial p3{0b1111};
@@ -68,7 +72,8 @@ static void add_subtract4() {
     g_assert_cmpuint((p1 - p2).value(), ==, p3.value());
 }
 
-static void add_subtract5() {
+static void add_subtract5()
+{
     Polynomial p1{0b110};
     Polynomial p2{0b110};
 
@@ -76,7 +81,8 @@ static void add_subtract5() {
     g_assert_cmpuint((p1 - p2).value(), ==, 0);
 }
 
-static void multiply1() {
+static void multiply1()
+{
     // Example in section 4.2 of FIPS 197.
     Polynomial p1{0x57};
     Polynomial p2{0x83};
@@ -84,7 +90,8 @@ static void multiply1() {
     g_assert_cmpuint((p1 * p2).value(), ==, 0xc1);
 }
 
-static void multiply2() {
+static void multiply2()
+{
     // Example in section 4.2.1 of FIPS 197.
     Polynomial p1{0x57};
     Polynomial p2{0x13};
@@ -92,7 +99,8 @@ static void multiply2() {
     g_assert_cmpuint((p1 * p2).value(), ==, 0xfe);
 }
 
-static void multiply3() {
+static void multiply3()
+{
     // https://en.wikipedia.org/wiki/Finite_field_arithmetic#Rijndael.27s_finite_field
     Polynomial p1{0x53};
     Polynomial p2{0xca};
@@ -100,7 +108,8 @@ static void multiply3() {
     g_assert_cmpuint((p1 * p2).value(), ==, 0x01);
 }
 
-static void multiply4() {
+static void multiply4()
+{
     // Stinson example 6.6
     uint8_t ip = 0b1011;
     Polynomial p1{0b101, ip, 3};
@@ -109,7 +118,8 @@ static void multiply4() {
     g_assert_cmpuint((p1 * p2).value(), ==, 0b110);
 }
 
-static void multiply5() {
+static void multiply5()
+{
     // Anything multiplied by zero had better be zero.
     Polynomial p0{0};
     Polynomial p1{0xca};
@@ -123,7 +133,8 @@ static void multiply5() {
     g_assert_cmpuint((p0 * p4).value(), ==, 0);
 }
 
-static void multiplication_table() {
+static void multiplication_table()
+{
     uint8_t ip = 0b1011;
 
     // Full multiplication table for GF(2^3) from Stinson Example 6.6
@@ -184,7 +195,8 @@ static void multiplication_table() {
     g_assert_cmpuint((Polynomial{0b111, ip, 3} * Polynomial{0b111, ip, 3}).value(), ==, 0b011);
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[])
+{
     setlocale(LC_ALL, "");
 
     g_test_init(&argc, &argv, nullptr);

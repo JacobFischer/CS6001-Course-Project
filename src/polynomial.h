@@ -38,7 +38,8 @@ namespace dumbaes {
 // This class basically only exists to provide classy operator overloading.
 // It's probably useless overkill, but I like it.
 // Reference: http://stackoverflow.com/questions/4421706/operator-overloading/4421719
-class Polynomial {
+class Polynomial
+{
   public:
     explicit Polynomial(uint8_t value,
                         uint16_t irreducible_polynomial = aes_irreducible_polynomial,

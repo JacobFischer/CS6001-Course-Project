@@ -56,12 +56,14 @@ Polynomial::Polynomial(uint8_t value,
 #endif
 }
 
-Polynomial& Polynomial::operator+=(const Polynomial& rhs) {
+Polynomial& Polynomial::operator+=(const Polynomial& rhs)
+{
     m_value ^= rhs.m_value;
     return *this;
 }
 
-Polynomial& Polynomial::operator-=(const Polynomial& rhs) {
+Polynomial& Polynomial::operator-=(const Polynomial& rhs)
+{
     // Life in a finite field where addition and subtraction are distinct
     // operations: t'would be a life not worth living at all.
     *this += rhs;
@@ -70,7 +72,8 @@ Polynomial& Polynomial::operator-=(const Polynomial& rhs) {
 
 // Based on https://en.wikipedia.org/wiki/Finite_field_arithmetic#Rijndael.27s_finite_field
 // Generalized to work with any characteristic.
-Polynomial& Polynomial::operator*=(const Polynomial& rhs) {
+Polynomial& Polynomial::operator*=(const Polynomial& rhs)
+{
     // FIXME: Consider turning this into a template class with the irreducible
     // polynomial and characteristic as template parameters, to prevent attempts
     // to multiply polynomials with different fields at compile time.
@@ -107,56 +110,68 @@ Polynomial& Polynomial::operator*=(const Polynomial& rhs) {
     return *this;
 }
 
-Polynomial& Polynomial::operator/=(const Polynomial& rhs) {
+Polynomial& Polynomial::operator/=(const Polynomial& rhs)
+{
     *this *= multiplicative_inverse(rhs);
     return *this;
 }
 
-Polynomial operator+(Polynomial lhs, const Polynomial& rhs) {
+Polynomial operator+(Polynomial lhs, const Polynomial& rhs)
+{
     lhs += rhs;
     return lhs;
 }
 
-Polynomial operator-(Polynomial lhs, const Polynomial& rhs) {
+Polynomial operator-(Polynomial lhs, const Polynomial& rhs)
+{
     lhs -= rhs;
     return lhs;
 }
 
-Polynomial operator*(Polynomial lhs, const Polynomial& rhs) {
+Polynomial operator*(Polynomial lhs, const Polynomial& rhs)
+{
     lhs *= rhs;
     return lhs;
 }
 
-Polynomial operator/(Polynomial lhs, const Polynomial& rhs) {
+Polynomial operator/(Polynomial lhs, const Polynomial& rhs)
+{
     lhs /= rhs;
     return lhs;
 }
 
-bool operator==(const Polynomial& lhs, const Polynomial& rhs) {
+bool operator==(const Polynomial& lhs, const Polynomial& rhs)
+{
     return lhs.value() == rhs.value();
 }
 
-bool operator!=(const Polynomial& lhs, const Polynomial& rhs) {
+bool operator!=(const Polynomial& lhs, const Polynomial& rhs)
+{
     return !(lhs == rhs);
 }
 
-bool operator<(const Polynomial& lhs, const Polynomial& rhs) {
+bool operator<(const Polynomial& lhs, const Polynomial& rhs)
+{
     return lhs.value() < rhs.value();
 }
 
-bool operator>(const Polynomial& lhs, const Polynomial& rhs) {
+bool operator>(const Polynomial& lhs, const Polynomial& rhs)
+{
     return rhs < lhs;
 }
 
-bool operator<=(const Polynomial& lhs, const Polynomial& rhs) {
+bool operator<=(const Polynomial& lhs, const Polynomial& rhs)
+{
     return !(lhs > rhs);
 }
 
-bool operator>=(const Polynomial& lhs, const Polynomial& rhs) {
+bool operator>=(const Polynomial& lhs, const Polynomial& rhs)
+{
     return !(lhs < rhs);
 }
 
-Polynomial multiplicative_inverse(const Polynomial& p) {
+Polynomial multiplicative_inverse(const Polynomial& p)
+{
     // We're supposed to extend the extended Euclidean algorithm to cover
     // polynomials and use that here. That would be smart, but I'm not smart.
     // I think there's an easier way... test every polynomial in the field!

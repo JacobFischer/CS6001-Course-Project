@@ -33,14 +33,26 @@
 
 namespace dumbaes {
 
-// The AES algorithm state is a 4x4 table.
-using State = std::array<std::array<uint8_t, 4>, 4>;
+// Nk. This would need to be changed to 6 for AES-192 or 8 for AES-256.
+static const int key_size = 4;
+
+// Nb. This is always 4 for AES.
+static const int block_size = 4;
+
+// Nr. This would need to be changed to 12 for AES-192 or 14 for AES-256.
+static const int num_rounds = 10;
+
+// The Rindjael algorithm state is a 4xNb table.
+using State = std::array<std::array<uint8_t, block_size>, 4>;
+
+using Word = std::array<uint8_t, 4>;
+using KeySchedule = std::array<Word, block_size * (num_rounds+1)>;
 
 static State block_to_state(const Block& block)
 {
     State state;
-    for (unsigned i = 0; i < 4; i++)
-        for (unsigned j = 0; j < 4; j++)
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
             state[i][j] = block[i + 4*j];
     return state;
 }
@@ -48,16 +60,57 @@ static State block_to_state(const Block& block)
 static Block state_to_block(State&& state)
 {
     Block block;
-    for (unsigned i = 0; i < 4; i++)
-        for (unsigned j = 0; j < 4; j++)
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
             block[i + 4*j] = state[i][j];
     return block;
 }
 
+static KeySchedule compute_key_schedule(const Key& key)
+{
+    // TODO
+    return KeySchedule{};
+}
+
+static void sub_bytes(State& state)
+{
+    // TODO
+}
+
+static void shift_rows(State& state)
+{
+    // TODO
+}
+
+static void mix_columns(State& state)
+{
+    // TODO
+}
+
+static void add_round_key(State& state, Word&& round_key)
+{
+    // TODO
+}
+
+// See FIPS 197, Fig. 5
 Block encrypt_block(const Block& block, const Key& key)
 {
-    State initial_state = block_to_state(block);
-    return state_to_block(std::move(initial_state));
+    State state = block_to_state(block);
+    auto key_schedule = compute_key_schedule(key);
+    add_round_key(state, std::move(key_schedule[0]));
+
+    for (int i = 1; i < num_rounds; i++) {
+        sub_bytes(state);
+        shift_rows(state);
+        mix_columns(state);
+        add_round_key(state, std::move(key_schedule[i]));
+    }
+
+    sub_bytes(state);
+    shift_rows(state);
+    add_round_key(state, std::move(key_schedule[num_rounds]));
+
+    return state_to_block(std::move(state));
 }
 
 }

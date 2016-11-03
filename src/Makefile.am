@@ -1,22 +1,22 @@
-bin_PROGRAMS = multinv
+bin_PROGRAMS = dumbaes
 
-noinst_LTLIBRARIES = libmultinv.la
+noinst_LTLIBRARIES = libdumbaes.la
 
-multinv_SOURCES = \
+dumbaes_SOURCES = \
 	main.cc
 
-multinv_CXXFLAGS = $(WARN_CXXFLAGS)
+dumbaes_CXXFLAGS = $(WARN_CXXFLAGS)
 
-multinv_LDADD = libmultinv.la
+dumbaes_LDADD = libdumbaes.la
 
-multinv_LDFLAGS = $(WARN_LDFLAGS)
+dumbaes_LDFLAGS = $(WARN_LDFLAGS)
 
-libmultinv_la_SOURCES = \
+libdumbaes_la_SOURCES = \
 	polynomial.cc	\
 	polynomial.h
 
-libmultinv_la_CXXFLAGS = $(WARN_CXXFLAGS)
+libdumbaes_la_CXXFLAGS = $(WARN_CXXFLAGS)
 
-libmultinv_la_LDFLAGS = $(WARN_LDFLAGS) -avoid-version -no-undefined
+libdumbaes_la_LDFLAGS = $(WARN_LDFLAGS) -avoid-version -no-undefined
 
 -include $(top_srcdir)/git.mk

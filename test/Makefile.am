@@ -1,19 +1,19 @@
-check_PROGRAMS = test-multinv
+check_PROGRAMS = test-dumbaes
 
-TESTS = test-multinv
+TESTS = test-dumbaes
 
-test_multinv_SOURCES = test.cc
+test_dumbaes_SOURCES = test.cc
 
-test_multinv_CPPFLAGS = \
+test_dumbaes_CPPFLAGS = \
 	-I$(top_srcdir)/src	\
 	$(GLIB_CFLAGS)
 
-test_multinv_CXXFLAGS = $(WARN_CXXFLAGS)
+test_dumbaes_CXXFLAGS = $(WARN_CXXFLAGS)
 
-test_multinv_LDADD = \
-	$(top_builddir)/src/libmultinv.la	\
+test_dumbaes_LDADD = \
+	$(top_builddir)/src/libdumbaes.la	\
 	$(GLIB_LIBS)
 
-test_multinv_LDFLAGS = $(WARN_LDFLAGS)
+test_dumbaes_LDFLAGS = $(WARN_LDFLAGS)
 
 -include $(top_srcdir)/git.mk

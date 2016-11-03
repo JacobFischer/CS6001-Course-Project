@@ -46,7 +46,8 @@ static const int num_rounds = 10;
 using State = std::array<std::array<uint8_t, block_size>, 4>;
 
 using Word = std::array<uint8_t, 4>;
-using KeySchedule = std::array<Word, block_size * (num_rounds+1)>;
+using RoundKey = std::array<Word, block_size>;
+using KeySchedule = std::array<RoundKey, num_rounds+1>;
 
 static State block_to_state(const Block& block)
 {
@@ -87,7 +88,7 @@ static void mix_columns(State& state)
     // TODO
 }
 
-static void add_round_key(State& state, Word&& round_key)
+static void add_round_key(State& state, RoundKey&& round_key)
 {
     // TODO
 }

@@ -73,12 +73,12 @@ static KeySchedule compute_key_schedule(const Key& key)
     return KeySchedule{};
 }
 
-static void sub_bytes(State& state)
+static void substitute_bytes(State& state)
 {
     // TODO
 }
 
-static void inverse_sub_bytes(State& state)
+static void inverse_substitute_bytes(State& state)
 {
     // TODO
 }
@@ -116,13 +116,13 @@ Block encrypt_block(const Block& block, const Key& key)
     add_round_key(state, std::move(key_schedule[0]));
 
     for (int i = 1; i < num_rounds; i++) {
-        sub_bytes(state);
+        substitute_bytes(state);
         shift_rows(state);
         mix_columns(state);
         add_round_key(state, std::move(key_schedule[i]));
     }
 
-    sub_bytes(state);
+    substitute_bytes(state);
     shift_rows(state);
     add_round_key(state, std::move(key_schedule[num_rounds]));
 
@@ -138,13 +138,13 @@ Block decrypt_block(const Block& block, const Key& key)
 
     for (int i = num_rounds - 1; i > 0; i--) {
         inverse_shift_rows(state);
-        inverse_sub_bytes(state);
+        inverse_substitute_bytes(state);
         add_round_key(state, std::move(key_schedule[i]));
         inverse_mix_columns(state);
     }
 
     inverse_shift_rows(state);
-    inverse_sub_bytes(state);
+    inverse_substitute_bytes(state);
     add_round_key(state, std::move(key_schedule[0]));
 
     return state_to_block(std::move(state));

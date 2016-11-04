@@ -1,5 +1,5 @@
 check_PROGRAMS = \
-	test-key-schedule
+	test-key-schedule	\
 	test-polynomials
 
 TESTS = $(check_PROGRAMS)

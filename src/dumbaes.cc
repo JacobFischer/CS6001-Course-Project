@@ -63,7 +63,7 @@ static State block_to_state(const Block& block)
 {
     State state;
     for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++)
+        for (int j = 0; j < block_size; j++)
             state[i][j] = block[i + 4*j];
     return state;
 }
@@ -72,7 +72,7 @@ static Block state_to_block(State&& state)
 {
     Block block;
     for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++)
+        for (int j = 0; j < block_size; j++)
             block[i + 4*j] = state[i][j];
     return block;
 }
@@ -84,7 +84,9 @@ static uint8_t substitute_byte(uint8_t byte)
 
 static void substitute_bytes(State& state)
 {
-    // TODO
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < block_size; j++)
+            state[i][j] = substitute_byte(state[i][j]);
 }
 
 static void inverse_substitute_bytes(State& state)

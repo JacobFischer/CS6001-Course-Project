@@ -192,13 +192,8 @@ KeySchedule compute_key_schedule(const Key& key)
     };
 
     KeySchedule schedule;
-    // This entire loop should really be a single memcpy. Design failure?
-    for (int i = 0; i < key_size; i++) {
-        schedule[i][0] = key[4*i];
-        schedule[i][1] = key[4*i + 1];
-        schedule[i][2] = key[4*i + 2];
-        schedule[i][3] = key[4*i + 3];
-    }
+    // First four round keys are copied straight from |key|.
+    std::memcpy(schedule.data(), key.data(), 4*key_size);
 
     for (int i = key_size; i < block_size * (num_rounds+1); i++) {
         Word temp = schedule[i-1];

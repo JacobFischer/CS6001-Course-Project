@@ -174,13 +174,24 @@ static Word rotate_word(Word word)
     return Word{word[1], word[2], word[3], word[0]};
 }
 
+static Word operator^(Word w1, Word w2)
+{
+    return Word{static_cast<uint8_t>(w1[0] ^ w2[0]),
+                static_cast<uint8_t>(w1[1] ^ w2[1]),
+                static_cast<uint8_t>(w1[2] ^ w2[2]),
+                static_cast<uint8_t>(w1[3] ^ w2[3])};
+}
+
 namespace internal {
 
 // FIPS 197 Fig. 11
 KeySchedule compute_key_schedule(const Key& key)
 {
-    KeySchedule schedule;
+    static const uint8_t round_constant[10] = {
+        0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36
+    };
 
+    KeySchedule schedule;
     // This entire loop should really be a single memcpy. Design failure?
     for (int i = 0; i < key_size; i++) {
         schedule[i][0] = key[4*i];
@@ -191,10 +202,12 @@ KeySchedule compute_key_schedule(const Key& key)
 
     for (int i = key_size; i <= block_size * num_rounds; i++) {
         Word temp = schedule[i-1];
-        if (i % key_size == 0)
-            temp = substitute_word(rotate_word(temp)) ^ round_constant[i/key_size];
+        if (i % key_size == 0) {
+            temp = substitute_word(rotate_word(temp));
+            temp[0] ^= round_constant[i/key_size - 1];
+        }
         // AES-256 would need an extra substitute_word here.
-        schedule[i] schedule[i-key_size] ^ temp;
+        schedule[i] = schedule[i-key_size] ^ temp;
     }
 
     return schedule;

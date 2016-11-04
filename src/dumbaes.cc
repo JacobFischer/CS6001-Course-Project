@@ -200,7 +200,7 @@ KeySchedule compute_key_schedule(const Key& key)
         schedule[i][3] = key[4*i + 3];
     }
 
-    for (int i = key_size; i <= block_size * num_rounds; i++) {
+    for (int i = key_size; i < block_size * (num_rounds+1); i++) {
         Word temp = schedule[i-1];
         if (i % key_size == 0) {
             temp = substitute_word(rotate_word(temp));

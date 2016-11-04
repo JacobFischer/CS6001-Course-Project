@@ -54,4 +54,21 @@ Block encrypt_block(const Block& block, const Key& key);
  */
 Block decrypt_block(const Block& block, const Key& key);
 
-}
+// Exposed only for unit tests.
+namespace internal {
+
+// Nk. This would need to be changed to 6 for AES-192 or 8 for AES-256.
+const int key_size = 4;
+// Nb. This is always 4 for AES.
+const int block_size = 4;
+// Nr. This would need to be changed to 12 for AES-192 or 14 for AES-256.
+const int num_rounds = 10;
+
+using Word = std::array<uint8_t, 4>;
+using KeySchedule = std::array<Word, block_size*(num_rounds+1)>;
+
+KeySchedule compute_key_schedule(const Key& key);
+
+} // namespace internal
+
+} // namespace dumbaes

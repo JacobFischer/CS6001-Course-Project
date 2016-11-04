@@ -29,25 +29,15 @@
 
 #include "dumbaes.h"
 
+#include <cstring>
 #include <utility>
 
 namespace dumbaes {
 
-// Nk. This would need to be changed to 6 for AES-192 or 8 for AES-256.
-static const int key_size = 4;
-
-// Nb. This is always 4 for AES.
-static const int block_size = 4;
-
-// Nr. This would need to be changed to 12 for AES-192 or 14 for AES-256.
-static const int num_rounds = 10;
+using namespace internal;
 
 // The Rindjael algorithm state is a 4xNb table.
 using State = std::array<std::array<uint8_t, block_size>, 4>;
-
-using Word = std::array<uint8_t, 4>;
-using RoundKey = std::array<Word, block_size>;
-using KeySchedule = std::array<RoundKey, num_rounds+1>;
 
 static State block_to_state(const Block& block)
 {
@@ -65,12 +55,6 @@ static Block state_to_block(State&& state)
         for (int j = 0; j < 4; j++)
             block[i + 4*j] = state[i][j];
     return block;
-}
-
-static KeySchedule compute_key_schedule(const Key& key)
-{
-    // TODO
-    return KeySchedule{};
 }
 
 static void substitute_bytes(State& state)
@@ -103,7 +87,7 @@ static void inverse_mix_columns(State& state)
     // TODO
 }
 
-static void add_round_key(State& state, RoundKey&& round_key)
+static void add_round_key(State& state, Word w0, Word w1, Word w2, Word w3)
 {
     // TODO
 }
@@ -112,19 +96,19 @@ static void add_round_key(State& state, RoundKey&& round_key)
 Block encrypt_block(const Block& block, const Key& key)
 {
     State state = block_to_state(block);
-    KeySchedule key_schedule = compute_key_schedule(key);
-    add_round_key(state, std::move(key_schedule[0]));
+    KeySchedule w = internal::compute_key_schedule(key);
+    add_round_key(state, w[0], w[1], w[2], w[3]);
 
     for (int i = 1; i < num_rounds; i++) {
         substitute_bytes(state);
         shift_rows(state);
         mix_columns(state);
-        add_round_key(state, std::move(key_schedule[i]));
+        add_round_key(state, w[i], w[i+1], w[i+2], w[i+3]);
     }
 
     substitute_bytes(state);
     shift_rows(state);
-    add_round_key(state, std::move(key_schedule[num_rounds]));
+    add_round_key(state, w[num_rounds], w[num_rounds+1], w[num_rounds+2], w[num_rounds+3]);
 
     return state_to_block(std::move(state));
 }
@@ -133,21 +117,54 @@ Block encrypt_block(const Block& block, const Key& key)
 Block decrypt_block(const Block& block, const Key& key)
 {
     State state = block_to_state(block);
-    KeySchedule key_schedule = compute_key_schedule(key);
-    add_round_key(state, std::move(key_schedule[num_rounds]));
+    KeySchedule w = compute_key_schedule(key);
+    add_round_key(state, w[num_rounds], w[num_rounds+1], w[num_rounds+2], w[num_rounds+3]);
 
     for (int i = num_rounds - 1; i > 0; i--) {
         inverse_shift_rows(state);
         inverse_substitute_bytes(state);
-        add_round_key(state, std::move(key_schedule[i]));
+        add_round_key(state, w[i], w[i+1], w[i+2], w[i+3]);
         inverse_mix_columns(state);
     }
 
     inverse_shift_rows(state);
     inverse_substitute_bytes(state);
-    add_round_key(state, std::move(key_schedule[0]));
+    add_round_key(state, w[0], w[1], w[2], w[3]);
 
     return state_to_block(std::move(state));
 }
 
+static Word substitute_word(Word word)
+{
+    return Word{};
 }
+
+static Word rotate_word(Word word)
+{
+    return Word{};
+}
+
+namespace internal {
+
+// FIPS 197 Fig. 11
+KeySchedule compute_key_schedule(const Key& key)
+{
+    KeySchedule schedule;
+
+    // This entire loop should really be a single memcpy. Design failure?
+    for (int i = 0; i < key_size; i++) {
+        schedule[i][0] = key[4*i];
+        schedule[i][1] = key[4*i + 1];
+        schedule[i][2] = key[4*i + 2];
+        schedule[i][3] = key[4*i + 3];
+    }
+
+    for (int i = key_size; i <= block_size * num_rounds; i++) {
+    }
+
+    return schedule;
+}
+
+} // namespace internal
+
+} // namespace dumbaes

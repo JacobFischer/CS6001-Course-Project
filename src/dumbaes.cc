@@ -79,7 +79,7 @@ static Block state_to_block(State&& state)
 
 static uint8_t substitute_byte(uint8_t byte)
 {
-   return sbox[byte & 0xf0][byte & 0x0f];
+   return sbox[(byte >> 4) & 0x0f][byte & 0x0f];
 }
 
 static void substitute_bytes(State& state)

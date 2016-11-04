@@ -114,9 +114,26 @@ static void inverse_mix_columns(State& state)
     // TODO
 }
 
+static Word& operator^=(Word& w1, Word w2)
+{
+    w1[0] ^= w2[0];
+    w1[1] ^= w2[1];
+    w1[2] ^= w2[2];
+    w1[3] ^= w2[3];
+    return w1;
+}
+
+static Word operator^(Word w1, Word w2)
+{
+    return w1 ^= w2;
+}
+
 static void add_round_key(State& state, Word w0, Word w1, Word w2, Word w3)
 {
-    // TODO
+   state[0] ^= w0;
+   state[1] ^= w1;
+   state[2] ^= w2;
+   state[3] ^= w3;
 }
 
 // See FIPS 197, Fig. 5
@@ -172,14 +189,6 @@ static Word substitute_word(Word word)
 static Word rotate_word(Word word)
 {
     return Word{word[1], word[2], word[3], word[0]};
-}
-
-static Word operator^(Word w1, Word w2)
-{
-    return Word{static_cast<uint8_t>(w1[0] ^ w2[0]),
-                static_cast<uint8_t>(w1[1] ^ w2[1]),
-                static_cast<uint8_t>(w1[2] ^ w2[2]),
-                static_cast<uint8_t>(w1[3] ^ w2[3])};
 }
 
 namespace internal {

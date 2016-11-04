@@ -1,19 +1,23 @@
-check_PROGRAMS = test-dumbaes
+check_PROGRAMS = \
+	test-key-schedule
+	test-polynomials
 
-TESTS = test-dumbaes
+TESTS = $(check_PROGRAMS)
 
-test_dumbaes_SOURCES = test.cc
-
-test_dumbaes_CPPFLAGS = \
-	-I$(top_srcdir)/src	\
-	$(GLIB_CFLAGS)
-
-test_dumbaes_CXXFLAGS = $(WARN_CXXFLAGS)
-
-test_dumbaes_LDADD = \
+LDADD = \
 	$(top_builddir)/src/libdumbaes.la	\
 	$(GLIB_LIBS)
 
-test_dumbaes_LDFLAGS = $(WARN_LDFLAGS)
+AM_CPPFLAGS = \
+	-I$(top_srcdir)/src	\
+	$(GLIB_CFLAGS)
+
+AM_CXXFLAGS = $(WARN_CXXFLAGS)
+
+AM_LDFLAGS = $(WARN_LDFLAGS)
+
+test_polynomials_SOURCES = test-polynomials.cc
+
+test_key_schedule_SOURCES = test-key-schedule.cc
 
 -include $(top_srcdir)/git.mk

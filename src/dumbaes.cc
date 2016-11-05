@@ -96,12 +96,42 @@ static void inverse_substitute_bytes(State& state)
 
 static void shift_rows(State& state)
 {
-    // TODO
+    State temp = state;
+
+    state[1][0] = temp[1][1];
+    state[1][1] = temp[1][2];
+    state[1][2] = temp[1][3];
+    state[1][3] = temp[1][0];
+
+    state[2][0] = temp[2][2];
+    state[2][1] = temp[2][3];
+    state[2][2] = temp[2][0];
+    state[2][3] = temp[2][1];
+
+    state[3][0] = temp[3][3];
+    state[3][1] = temp[3][0];
+    state[3][2] = temp[3][1];
+    state[3][3] = temp[3][2];
 }
 
 static void inverse_shift_rows(State& state)
 {
-    // TODO
+    State temp = state;
+
+    state[1][0] = temp[1][3];
+    state[1][1] = temp[1][0];
+    state[1][2] = temp[1][1];
+    state[1][3] = temp[1][2];
+
+    state[2][0] = temp[2][2];
+    state[2][1] = temp[2][3];
+    state[2][2] = temp[2][0];
+    state[2][3] = temp[2][1];
+
+    state[3][0] = temp[3][1];
+    state[3][1] = temp[3][2];
+    state[3][2] = temp[3][3];
+    state[3][3] = temp[3][0];
 }
 
 static void mix_columns(State& state)

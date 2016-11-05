@@ -72,6 +72,7 @@ static void test_encryption_state()
                 g_assert_cmpuint(state[3][1], ==, 0x8d);
                 g_assert_cmpuint(state[3][2], ==, 0xa2);
                 g_assert_cmpuint(state[3][3], ==, 0x34);
+                break;
             case 1:
                 g_assert_cmpuint(state[0][0], ==, 0x32);
                 g_assert_cmpuint(state[0][1], ==, 0x88);

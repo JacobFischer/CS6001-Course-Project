@@ -4,6 +4,8 @@ It's a class project. It should give you the right answer, but it is not fit for
 real world use. The implementation is slow and stupid. It's vulnerable to all
 sorts of side-channel attacks. Don't use it.
 
+Pronounciation: you can probably figure this out yourself.
+
 Requirements for tarball builds:
 
  * A C++14 compiler for binary literals. (GCC 5 should work. Tested with GCC 6.)

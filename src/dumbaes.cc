@@ -263,7 +263,7 @@ Block encrypt_block(
     State state = block_to_state(block);
     test_hook(state, 0);
 
-    KeySchedule w = internal::compute_key_schedule(key);
+    KeySchedule w = compute_key_schedule(key);
     add_round_key(state, w[0], w[1], w[2], w[3]);
 
     for (int i = 1; i < num_rounds; i++) {

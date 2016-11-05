@@ -74,25 +74,25 @@ static void test_encryption_state()
                 g_assert_cmpuint(state[3][3], ==, 0x34);
                 break;
             case 1:
-                g_assert_cmpuint(state[0][0], ==, 0x32);
-                g_assert_cmpuint(state[0][1], ==, 0x88);
-                g_assert_cmpuint(state[0][2], ==, 0x31);
-                g_assert_cmpuint(state[0][3], ==, 0xe0);
+                g_assert_cmpuint(state[0][0], ==, 0x19);
+                g_assert_cmpuint(state[0][1], ==, 0xa0);
+                g_assert_cmpuint(state[0][2], ==, 0x9a);
+                g_assert_cmpuint(state[0][3], ==, 0xe9);
 
-                g_assert_cmpuint(state[1][0], ==, 0x43);
-                g_assert_cmpuint(state[1][1], ==, 0x5a);
-                g_assert_cmpuint(state[1][2], ==, 0x31);
-                g_assert_cmpuint(state[1][3], ==, 0x37);
+                g_assert_cmpuint(state[1][0], ==, 0x3d);
+                g_assert_cmpuint(state[1][1], ==, 0xf4);
+                g_assert_cmpuint(state[1][2], ==, 0xc6);
+                g_assert_cmpuint(state[1][3], ==, 0xf8);
 
-                g_assert_cmpuint(state[2][0], ==, 0xf6);
-                g_assert_cmpuint(state[2][1], ==, 0x30);
-                g_assert_cmpuint(state[2][2], ==, 0x98);
-                g_assert_cmpuint(state[2][3], ==, 0x07);
+                g_assert_cmpuint(state[2][0], ==, 0xe3);
+                g_assert_cmpuint(state[2][1], ==, 0xe2);
+                g_assert_cmpuint(state[2][2], ==, 0x8d);
+                g_assert_cmpuint(state[2][3], ==, 0x48);
 
-                g_assert_cmpuint(state[3][0], ==, 0xa8);
-                g_assert_cmpuint(state[3][1], ==, 0x8d);
-                g_assert_cmpuint(state[3][2], ==, 0xa2);
-                g_assert_cmpuint(state[3][3], ==, 0x34);
+                g_assert_cmpuint(state[3][0], ==, 0xbe);
+                g_assert_cmpuint(state[3][1], ==, 0x2b);
+                g_assert_cmpuint(state[3][2], ==, 0x2a);
+                g_assert_cmpuint(state[3][3], ==, 0x08);
                 break;
             case 2:
                 g_assert_cmpuint(state[0][0], ==, 0xa4);

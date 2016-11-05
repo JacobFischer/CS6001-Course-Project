@@ -238,12 +238,20 @@ Block decrypt_block(const Block& block, const Key& key)
 {
     State state = block_to_state(block);
     KeySchedule w = compute_key_schedule(key);
-    add_round_key(state, w[num_rounds], w[num_rounds+1], w[num_rounds+2], w[num_rounds+3]);
+    add_round_key(state,
+                  w[num_rounds*block_size],
+                  w[num_rounds*block_size + 1],
+                  w[num_rounds*block_size + 2],
+                  w[num_rounds*block_size + 3]);
 
     for (int i = num_rounds - 1; i > 0; i--) {
         inverse_shift_rows(state);
         inverse_substitute_bytes(state);
-        add_round_key(state, w[i], w[i+1], w[i+2], w[i+3]);
+        add_round_key(state,
+                      w[i*block_size],
+                      w[i*block_size + 1],
+                      w[i*block_size + 2],
+                      w[i*block_size + 3]);
         inverse_mix_columns(state);
     }
 
@@ -311,13 +319,21 @@ Block encrypt_block(
         substitute_bytes(state);
         shift_rows(state);
         mix_columns(state);
-        add_round_key(state, w[i], w[i+1], w[i+2], w[i+3]);
+        add_round_key(state,
+                      w[i*block_size],
+                      w[i*block_size + 1],
+                      w[i*block_size + 2],
+                      w[i*block_size + 3]);
     }
 
     test_hook(state, num_rounds);
     substitute_bytes(state);
     shift_rows(state);
-    add_round_key(state, w[num_rounds], w[num_rounds+1], w[num_rounds+2], w[num_rounds+3]);
+    add_round_key(state,
+                  w[num_rounds*block_size],
+                  w[num_rounds*block_size + 1],
+                  w[num_rounds*block_size + 2],
+                  w[num_rounds*block_size + 3]);
 
     return state_to_block(std::move(state));
 }

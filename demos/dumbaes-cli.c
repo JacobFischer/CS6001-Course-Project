@@ -146,43 +146,23 @@ write_to_output_file (const unsigned char *output)
 {
   GFile *file;
   GFileIOStream *iostream;
-  GOutputStream *output_stream;
   gsize bytes_written;
   int ret = EXIT_FAILURE;
   GError *error = NULL;
 
   file = g_file_new_for_path (output_filename);
-  iostream = g_file_create_readwrite (file,
-                                      G_FILE_CREATE_REPLACE_DESTINATION,
-                                      NULL,
-                                      &error);
+  iostream = g_file_replace_readwrite (file, NULL, FALSE, 0, NULL, &error);
   if (iostream == NULL)
     {
-      if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_EXISTS))
-        {
-          g_clear_error (&error);
-          iostream = g_file_open_readwrite (file, NULL, &error);
-          if (iostream == NULL)
-            {
-              g_fprintf (stderr, "Failed to open %s for writing: %s\n", output_filename, error->message);
-              g_error_free (error);
-              goto out;
-            }
-        }
-      else
-        {
-          g_fprintf (stderr, "Failed to create %s for writing: %s\n", output_filename, error->message);
-          g_error_free (error);
-          goto out;
-        }
+      g_fprintf (stderr, "Failed to open %s for writing: %s\n", output_filename, error->message);
+      g_error_free (error);
+      goto out;
     }
-
-  output_stream = g_io_stream_get_output_stream (G_IO_STREAM (iostream));
 
   // TODO: When switching to CBC, this function should receive a NULL-terminated
   // const char * instead of a const unsigned char *, and the third argument to
   // g_output_stream_write_all() should use strlen() rather than be hardcoded.
-  if (!g_output_stream_write_all (output_stream,
+  if (!g_output_stream_write_all (g_io_stream_get_output_stream (G_IO_STREAM (iostream)),
                                   output,
                                   16,
                                   &bytes_written,

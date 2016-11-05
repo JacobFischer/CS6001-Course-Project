@@ -309,6 +309,26 @@ static void test_encryption_state()
     g_assert_cmpuint(result[15], ==, 0x32);
 }
 
+static void test_encryption_decrypt()
+{
+    // FIXME: This test should be run many times for random inputs and keys.
+    Block input = {0x32, 0x43, 0xf6, 0xa8,
+                   0x88, 0x5a, 0x30, 0x8d,
+                   0x31, 0x31, 0x98, 0xa2,
+                   0xe0, 0x37, 0x07, 0x34};
+
+    Key key = {0x2b, 0x7e, 0x15, 0x16,
+               0x28, 0xae, 0xd2, 0xa6,
+               0xab, 0xf7, 0x15, 0x88,
+               0x09, 0xcf, 0x4f, 0x3c};
+
+    Block ciphertext = encrypt_block(input, key);
+    Block plaintext = decrypt_block(ciphertext, key);
+
+    for (int i = 0; i < 16; i++)
+        g_assert_cmpuint(input[i], ==, plaintext[i]);
+}
+
 int main(int argc, char* argv[])
 {
     setlocale(LC_ALL, "");
@@ -316,6 +336,7 @@ int main(int argc, char* argv[])
     g_test_init(&argc, &argv, nullptr);
 
     g_test_add_func("/Encryption/state", test_encryption_state);
+    g_test_add_func("/Encryption/decrypt", test_encryption_decrypt);
 
     return g_test_run();
 }

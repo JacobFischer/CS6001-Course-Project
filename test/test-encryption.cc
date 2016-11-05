@@ -32,7 +32,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <glib.h>
-#include <locale.h>
 
 using namespace dumbaes;
 
@@ -367,8 +366,6 @@ static void test_c_api()
 
 int main(int argc, char* argv[])
 {
-    setlocale(LC_ALL, "");
-
     g_test_init(&argc, &argv, nullptr);
 
     g_test_add_func("/Encryption/state", test_encryption_state);

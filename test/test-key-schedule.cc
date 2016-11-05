@@ -29,7 +29,6 @@
 
 #include "src/dumbaes.h"
 #include <glib.h>
-#include <locale.h>
 
 using namespace dumbaes;
 
@@ -266,8 +265,6 @@ static void test_expansion_128()
 
 int main(int argc, char* argv[])
 {
-    setlocale(LC_ALL, "");
-
     g_test_init(&argc, &argv, nullptr);
 
     g_test_add_func("/KeySchedule/expansion128", test_expansion_128);

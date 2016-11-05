@@ -29,7 +29,6 @@
 
 #include "src/polynomial.h"
 #include <glib.h>
-#include <locale.h>
 
 using namespace dumbaes;
 
@@ -196,8 +195,6 @@ static void multiplication_table()
 
 int main(int argc, char* argv[])
 {
-    setlocale(LC_ALL, "");
-
     g_test_init(&argc, &argv, nullptr);
 
     g_test_add_func("/Polynomial/add-subtract1", add_subtract1);

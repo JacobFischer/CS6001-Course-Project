@@ -189,7 +189,6 @@ static void add_round_key(State& state, Word w0, Word w1, Word w2, Word w3)
    state[3] ^= w3;
 }
 
-// See FIPS 197, Fig. 5
 Block encrypt_block(const Block& block, const Key& key)
 {
     return internal::encrypt_block(block, key, [](const State&, int){});
@@ -255,6 +254,7 @@ KeySchedule compute_key_schedule(const Key& key)
     return schedule;
 }
 
+// See FIPS 197, Fig. 5
 Block encrypt_block(
     const Block& block,
     const Key& key,

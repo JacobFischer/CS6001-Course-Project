@@ -243,6 +243,7 @@ namespace internal {
 // FIPS 197 Fig. 11
 KeySchedule compute_key_schedule(const Key& key)
 {
+    static_assert(num_rounds == 10);
     static const uint8_t round_constant[10] = {
         0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36
     };

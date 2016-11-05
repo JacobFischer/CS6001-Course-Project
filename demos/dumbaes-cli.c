@@ -70,10 +70,10 @@ read_ciphertext (void)
     }
 
   // TODO: Remove length restriction when switching to CBC.
-  if (ciphertext_length != 17)
+  if (ciphertext_length < 16)
     {
       g_fprintf (stderr,
-                 "Read %" G_GSIZE_FORMAT " bytes from %s, but ciphertext file must be exactly 17 bytes long (16 plus EOF)\n",
+                 "Read %" G_GSIZE_FORMAT " bytes from %s, but ciphertext file must be 16 bytes long\n",
                  ciphertext_length, ciphertext_filename);
       g_free (ciphertext);
       return NULL;
@@ -100,10 +100,10 @@ read_plaintext (void)
     }
 
   // TODO: Remove length restriction when switching to CBC.
-  if (plaintext_length != 17)
+  if (plaintext_length < 16)
     {
       g_fprintf (stderr,
-                 "Read %" G_GSIZE_FORMAT " bytes from %s, but plaintext file must be exactly 17 bytes long (16 plus EOF)\n",
+                 "Read %" G_GSIZE_FORMAT " bytes from %s, but plaintext file must be 16 bytes long\n",
                  plaintext_length, plaintext_filename);
       g_free (plaintext);
       return NULL;
@@ -129,10 +129,10 @@ read_private_key (void)
       return NULL;
     }
 
-  if (key_length != 17)
+  if (key_length < 16)
     {
       g_fprintf (stderr,
-                 "Read %" G_GSIZE_FORMAT " bytes from %s, but key file must be exactly 17 bytes long (16 plus EOF)\n",
+                 "Read %" G_GSIZE_FORMAT " bytes from %s, but key file must be 16 bytes long\n",
                  key_length, key_filename);
       g_free (key);
       return NULL;

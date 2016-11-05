@@ -1,10 +1,9 @@
 lib_LTLIBRARIES = libdumbaes.la
 
-include_SOURCES = dumbaes.h
+dumbaes_includedir = $(includedir)/dumbaes
+dist_dumbaes_include_HEADERS = dumbaes.h
 
-libdumbaes_la_SOURCES = \
-	dumbaes.cc	\
-	dumbaes.h
+libdumbaes_la_SOURCES = dumbaes.cc
 
 libdumbaes_la_CXXFLAGS = \
 	$(WARN_CXXFLAGS)	\

@@ -40,6 +40,8 @@ namespace dumbaes {
 class PolynomialPolynomial
 {
   public:
+    using Word = internal::Word;
+
     PolynomialPolynomial(const Polynomial& a3,
                          const Polynomial& a2,
                          const Polynomial& a1,
@@ -48,9 +50,9 @@ class PolynomialPolynomial
     PolynomialPolynomial& operator+=(const PolynomialPolynomial&);
     PolynomialPolynomial& operator*=(const PolynomialPolynomial&);
 
-  private:
-    using Word = internal::Word;
+    const Word& value() { return m_value; }
 
+  private:
     Word m_value;
 };
 

@@ -30,6 +30,7 @@
 #include "dumbaes.h"
 
 #include "polynomial.h"
+#include "polynomial-polynomial.h"
 #include <cstdint>
 #include <cstring>
 #include <utility>
@@ -158,23 +159,36 @@ static void inverse_shift_rows(State& state)
     state[3][3] = temp[3][0];
 }
 
+static void do_mix_columns(State& state, PolynomialPolynomial&& a)
+{
+    for (int c = 0; c < 4; c++) {
+        PolynomialPolynomial b{Polynomial{state[3][c]},
+                               Polynomial{state[2][c]},
+                               Polynomial{state[1][c]},
+                               Polynomial{state[0][c]}};
+        PolynomialPolynomial result = a*b;
+
+        state[0][c] = result.value()[0];
+        state[1][c] = result.value()[1];
+        state[2][c] = result.value()[2];
+        state[3][c] = result.value()[3];
+    }
+}
+
 static void mix_columns(State& state)
 {
-#if 0
-    State temp = state;
-
-    for (int c = 0; c < 4, c++) {
-      state[0][c] = Polynomial{0x02}*Polynomial{state[0][3]} ?? ;
-      state[1][c] = ;
-      state[2][c] = ;
-      state[3][c] = ;
-    }
-#endif
+    do_mix_columns(state, PolynomialPolynomial{Polynomial{0x03},
+                                               Polynomial{0x01},
+                                               Polynomial{0x01},
+                                               Polynomial{0x02}});
 }
 
 static void inverse_mix_columns(State& state)
 {
-    // TODO
+    do_mix_columns(state, PolynomialPolynomial{Polynomial{0x0b},
+                                               Polynomial{0x0d},
+                                               Polynomial{0x09},
+                                               Polynomial{0x0e}});
 }
 
 static void add_round_key(State& state, Word w0, Word w1, Word w2, Word w3)

@@ -50,7 +50,7 @@ class PolynomialPolynomial
     PolynomialPolynomial& operator+=(const PolynomialPolynomial&);
     PolynomialPolynomial& operator*=(const PolynomialPolynomial&);
 
-    const Word& value() { return m_value; }
+    const Word& value() const { return m_value; }
 
   private:
     Word m_value;

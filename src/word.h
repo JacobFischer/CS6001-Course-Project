@@ -29,55 +29,15 @@
 
 #pragma once
 
-#include "word.h"
 #include <array>
-#include <cstdint>
-#include <functional>
 
 namespace dumbaes {
-
-// 16 bytes * 8 bits/byte = 128 bits. Same for all versions of AES.
-using Block = std::array<uint8_t, 16>;
-
-// This would need to be changed to 24 or 32 for AES-192 or AES-256.
-using Key = std::array<uint8_t, 16>;
-
-/**
- * It encrypts one block of data with the specified key. This probably shouldn't
- * ever be used directly by applications; it's intended for use by block cipher
- * mode implementations.
- */
-Block encrypt_block(const Block& block, const Key& key);
-
-/**
- * It decrypts one block of data with the specified key. This probably shouldn't
- * ever be used directly by applications; it's intended for use by block cipher
- * mode implementations.
- */
-Block decrypt_block(const Block& block, const Key& key);
-
-// Exposed only for unit tests.
 namespace internal {
 
-// Nk. This would need to be changed to 6 for AES-192 or 8 for AES-256.
-const int key_size = 4;
-// Nb. This is always 4 for AES.
-const int block_size = 4;
-// Nr. This would need to be changed to 12 for AES-192 or 14 for AES-256.
-const int num_rounds = 10;
+using Word = std::array<uint8_t, 4>;
 
-using KeySchedule = std::array<Word, block_size*(num_rounds+1)>;
+Word& operator^=(Word& w1, Word w2);
+Word operator^(Word w1, Word w2);
 
-KeySchedule compute_key_schedule(const Key&);
-
-// The Rindjael algorithm state is a 4xNb table.
-using State = std::array<std::array<uint8_t, block_size>, 4>;
-
-Block encrypt_block(
-    const Block&,
-    const Key&,
-    std::function<void (const State&, int)>&& test_hook);
-
-} // namespace internal
-
-} // namespace dumbaes
+}
+}

@@ -167,20 +167,6 @@ static void inverse_mix_columns(State& state)
     // TODO
 }
 
-static Word& operator^=(Word& w1, Word w2)
-{
-    w1[0] ^= w2[0];
-    w1[1] ^= w2[1];
-    w1[2] ^= w2[2];
-    w1[3] ^= w2[3];
-    return w1;
-}
-
-static Word operator^(Word w1, Word w2)
-{
-    return w1 ^= w2;
-}
-
 static void add_round_key(State& state, Word w0, Word w1, Word w2, Word w3)
 {
    state[0] ^= w0;

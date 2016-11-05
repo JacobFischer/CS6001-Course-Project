@@ -12,10 +12,14 @@ dumbaes_LDADD = libdumbaes.la
 dumbaes_LDFLAGS = $(WARN_LDFLAGS)
 
 libdumbaes_la_SOURCES = \
-	dumbaes.cc	\
-	dumbaes.h	\
-	polynomial.cc	\
-	polynomial.h
+	dumbaes.cc			\
+	dumbaes.h			\
+	polynomial.cc			\
+	polynomial.h			\
+	polynomial-polynomial.cc	\
+	polynomial-polynomial.h		\
+	word.cc				\
+	word.h
 
 libdumbaes_la_CXXFLAGS = $(WARN_CXXFLAGS)
 

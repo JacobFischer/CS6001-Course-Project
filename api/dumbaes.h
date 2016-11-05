@@ -30,7 +30,7 @@
 #ifndef DUMBAES_H
 #define DUMBAES_H
 
-#ifndef __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -97,7 +97,7 @@ char *dumbaes_128_encrypt_cbc (const char          *ciphertext,
 
 #endif
 
-#ifndef __cplusplus
+#ifdef __cplusplus
 } // extern "C"
 #endif
 

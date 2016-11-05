@@ -103,9 +103,11 @@ main (int argc, char **argv)
 
 out:
   g_option_context_free (context);
+
   g_free (ciphertext_filename);
   g_free (plaintext_filename);
   g_free (key_filename);
   g_free (output_filename);
+
   return ret;
 }

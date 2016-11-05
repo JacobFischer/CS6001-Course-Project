@@ -37,9 +37,6 @@ namespace dumbaes {
 
 using namespace internal;
 
-// The Rindjael algorithm state is a 4xNb table.
-using State = std::array<std::array<uint8_t, block_size>, 4>;
-
 static uint8_t sbox[16][16] = {
     {0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76},
     {0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0},
@@ -169,22 +166,7 @@ static void add_round_key(State& state, Word w0, Word w1, Word w2, Word w3)
 // See FIPS 197, Fig. 5
 Block encrypt_block(const Block& block, const Key& key)
 {
-    State state = block_to_state(block);
-    KeySchedule w = internal::compute_key_schedule(key);
-    add_round_key(state, w[0], w[1], w[2], w[3]);
-
-    for (int i = 1; i < num_rounds; i++) {
-        substitute_bytes(state);
-        shift_rows(state);
-        mix_columns(state);
-        add_round_key(state, w[i], w[i+1], w[i+2], w[i+3]);
-    }
-
-    substitute_bytes(state);
-    shift_rows(state);
-    add_round_key(state, w[num_rounds], w[num_rounds+1], w[num_rounds+2], w[num_rounds+3]);
-
-    return state_to_block(std::move(state));
+    return internal::encrypt_block(block, key, [](const State&, int){});
 }
 
 // See FIPS 197, Fig. 12
@@ -245,6 +227,33 @@ KeySchedule compute_key_schedule(const Key& key)
     }
 
     return schedule;
+}
+
+Block encrypt_block(
+    const Block& block,
+    const Key& key,
+    std::function<void (const State&, int)>&& test_hook)
+{
+    State state = block_to_state(block);
+    test_hook(state, 0);
+
+    KeySchedule w = internal::compute_key_schedule(key);
+    add_round_key(state, w[0], w[1], w[2], w[3]);
+
+    for (int i = 1; i < num_rounds; i++) {
+        test_hook(state, i);
+        substitute_bytes(state);
+        shift_rows(state);
+        mix_columns(state);
+        add_round_key(state, w[i], w[i+1], w[i+2], w[i+3]);
+    }
+
+    test_hook(state, num_rounds);
+    substitute_bytes(state);
+    shift_rows(state);
+    add_round_key(state, w[num_rounds], w[num_rounds+1], w[num_rounds+2], w[num_rounds+3]);
+
+    return state_to_block(std::move(state));
 }
 
 } // namespace internal

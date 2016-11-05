@@ -31,6 +31,7 @@
 
 #include <array>
 #include <cstdint>
+#include <functional>
 
 namespace dumbaes {
 
@@ -67,7 +68,15 @@ const int num_rounds = 10;
 using Word = std::array<uint8_t, 4>;
 using KeySchedule = std::array<Word, block_size*(num_rounds+1)>;
 
-KeySchedule compute_key_schedule(const Key& key);
+KeySchedule compute_key_schedule(const Key&);
+
+// The Rindjael algorithm state is a 4xNb table.
+using State = std::array<std::array<uint8_t, block_size>, 4>;
+
+Block encrypt_block(
+    const Block&,
+    const Key&,
+    std::function<void (const State&, int)>&& test_hook);
 
 } // namespace internal
 

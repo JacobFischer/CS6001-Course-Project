@@ -7,7 +7,7 @@ sorts of side-channel attacks. Don't use it.
 Requirements for tarball builds:
 
  * A C++14 compiler for binary literals. (GCC 5 should work. Tested with GCC 6.)
- * GLib >= 2.32
+ * GLib >= 2.32.
  * That's it!
 
 Additional requirements for builds from git:
@@ -23,16 +23,25 @@ Usage:
 make
 # Running the tests would be a dandy swell idea:
 make check
-# You can run it from the source directory, but if you want to install it:
-sudo make install
-# To run it from the source directory:
-src/dumbaes
+
+Once it's built, try out an example program:
+
+***TODO***: write a demo program and add instructions for use here
+
+You can install it with `sudo make install` if you really want to, but this
+library is dumb, so why would you?
 
 If you're building from git, you need to run autogen.sh rather than configure.
 
 -Werror is enabled for builds from git. The recommended way to turn it off if
 you hit compiler warnings is to pass --disable-Werror to configure.
 
-There is no provision for user input. That is, the program is basically useless
-as-is. It is intended to be used for homework projects by modifying main() to
-perform the math you need. Yes, I know that sucks.
+Directory layout:
+
+- dumbaes/
+-- api/ - The public C API. Includes documentation of external functions.
+-- build-aux/ - Build goo. Nothing interesting here.
+-- demos/ - Applications to demo usage of the libdumbaes API.
+-- m4/ - M4sh build goo. Nothing interesting here either.
+-- src/ - Cryptography implementation
+-- test/ - Tests of course

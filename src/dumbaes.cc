@@ -95,9 +95,11 @@ static Block state_to_block(State&& state)
     return block;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+// For debugging only... obviously.
 static void print_state(const State& state)
 {
-    // Obviously this is only for debugging
     std::fprintf(stderr,
                  "\n%02x%02x%02x%02x\n%02x%02x%02x%02x\n%02x%02x%02x%02x\n%02x%02x%02x%02x\n\n",
                  state[0][0], state[0][1], state[0][2], state[0][3],
@@ -105,6 +107,7 @@ static void print_state(const State& state)
                  state[2][0], state[2][1], state[2][2], state[2][3],
                  state[3][0], state[3][1], state[3][2], state[3][3]);
 }
+#pragma GCC diagnostic pop
 
 static uint8_t substitute_byte(uint8_t byte)
 {

@@ -1,15 +1,4 @@
-bin_PROGRAMS = dumbaes
-
 noinst_LTLIBRARIES = libdumbaes.la
-
-dumbaes_SOURCES = \
-	main.cc
-
-dumbaes_CXXFLAGS = $(WARN_CXXFLAGS)
-
-dumbaes_LDADD = libdumbaes.la
-
-dumbaes_LDFLAGS = $(WARN_LDFLAGS)
 
 libdumbaes_la_SOURCES = \
 	dumbaes.cc			\

@@ -6,11 +6,13 @@ dumbaes_cli_CFLAGS = $(WARN_CFLAGS)
 
 dumbaes_cli_CPPFLAGS = \
 	-I$(top_srcdir)/api	\
-	$(GLIB_CFLAGS)
+	$(GLIB_CFLAGS)		\
+	$(GIO_CFLAGS)
 
 dumbaes_cli_LDADD = \
 	$(top_builddir)/api/libdumbaes.la	\
-	$(GLIB_LIBS)
+	$(GLIB_LIBS)				\
+	$(GIO_LIBS)
 
 dumbaes_cli_LDFLAGS = $(WARN_LDFLAGS)
 

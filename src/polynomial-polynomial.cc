@@ -51,7 +51,31 @@ PolynomialPolynomial& PolynomialPolynomial::operator+=(
 PolynomialPolynomial& PolynomialPolynomial::operator*=(
     const PolynomialPolynomial& rhs)
 {
-    // TODO
+    // FIPS 197 equation 4.12
+    Word a = m_value;
+    Word b = rhs.m_value;
+    Word& d = m_value;
+
+    d[0] = ((Polynomial{a[0]} * Polynomial{b[0]}) +
+            (Polynomial{a[3]} * Polynomial{b[1]}) +
+            (Polynomial{a[2]} * Polynomial{b[2]}) +
+            (Polynomial{a[1]} * Polynomial{b[3]})).value();
+
+    d[1] = ((Polynomial{a[1]} * Polynomial{b[0]}) +
+            (Polynomial{a[0]} * Polynomial{b[1]}) +
+            (Polynomial{a[3]} * Polynomial{b[2]}) +
+            (Polynomial{a[2]} * Polynomial{b[3]})).value();
+
+    d[2] = ((Polynomial{a[2]} * Polynomial{b[0]}) +
+            (Polynomial{a[1]} * Polynomial{b[1]}) +
+            (Polynomial{a[0]} * Polynomial{b[2]}) +
+            (Polynomial{a[3]} * Polynomial{b[3]})).value();
+
+    d[3] = ((Polynomial{a[3]} * Polynomial{b[0]}) +
+            (Polynomial{a[2]} * Polynomial{b[1]}) +
+            (Polynomial{a[1]} * Polynomial{b[2]}) +
+            (Polynomial{a[0]} * Polynomial{b[3]})).value();
+
     return *this;
 }
 

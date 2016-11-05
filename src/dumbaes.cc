@@ -29,6 +29,7 @@
 
 #include "dumbaes.h"
 
+#include "polynomial.h"
 #include <cstdint>
 #include <cstring>
 #include <utility>
@@ -159,7 +160,16 @@ static void inverse_shift_rows(State& state)
 
 static void mix_columns(State& state)
 {
-    // TODO
+#if 0
+    State temp = state;
+
+    for (int c = 0; c < 4, c++) {
+      state[0][c] = Polynomial{0x02}*Polynomial{state[0][3]} ?? ;
+      state[1][c] = ;
+      state[2][c] = ;
+      state[3][c] = ;
+    }
+#endif
 }
 
 static void inverse_mix_columns(State& state)

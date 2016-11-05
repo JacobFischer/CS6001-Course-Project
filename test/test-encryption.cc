@@ -307,26 +307,37 @@ static void test_encryption_state()
     g_assert_cmphex(result[13], ==, 0x6a);
     g_assert_cmphex(result[14], ==, 0x0b);
     g_assert_cmphex(result[15], ==, 0x32);
+
+    Block plaintext = decrypt_block(result, key);
+    for (int j = 0; j < 16; j++)
+        g_assert_cmphex(input[j], ==, plaintext[j]);
+}
+
+static uint8_t random_byte()
+{
+    // Note: use `gtester --seed` to debug a particular failure.
+    return g_test_rand_int_range(0, 0xff);
 }
 
 static void test_encryption_decrypt()
 {
-    // FIXME: This test should be run many times for random inputs and keys.
-    Block input = {0x32, 0x43, 0xf6, 0xa8,
-                   0x88, 0x5a, 0x30, 0x8d,
-                   0x31, 0x31, 0x98, 0xa2,
-                   0xe0, 0x37, 0x07, 0x34};
+    for (int i = 0; i < 1000; i++) {
+        Block input = {random_byte(), random_byte(), random_byte(), random_byte(),
+                       random_byte(), random_byte(), random_byte(), random_byte(),
+                       random_byte(), random_byte(), random_byte(), random_byte(),
+                       random_byte(), random_byte(), random_byte(), random_byte()};
 
-    Key key = {0x2b, 0x7e, 0x15, 0x16,
-               0x28, 0xae, 0xd2, 0xa6,
-               0xab, 0xf7, 0x15, 0x88,
-               0x09, 0xcf, 0x4f, 0x3c};
+        Key key = {random_byte(), random_byte(), random_byte(), random_byte(),
+                   random_byte(), random_byte(), random_byte(), random_byte(),
+                   random_byte(), random_byte(), random_byte(), random_byte(),
+                   random_byte(), random_byte(), random_byte(), random_byte()};
 
-    Block ciphertext = encrypt_block(input, key);
-    Block plaintext = decrypt_block(ciphertext, key);
+        Block ciphertext = encrypt_block(input, key);
+        Block plaintext = decrypt_block(ciphertext, key);
 
-    for (int i = 0; i < 16; i++)
-        g_assert_cmphex(input[i], ==, plaintext[i]);
+        for (int j = 0; j < 16; j++)
+            g_assert_cmphex(input[j], ==, plaintext[j]);
+    }
 }
 
 int main(int argc, char* argv[])

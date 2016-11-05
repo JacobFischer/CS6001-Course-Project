@@ -26,6 +26,11 @@ make
 # Running the tests would be a dandy swell idea:
 make check
 
+If you're building from git, you need to run autogen.sh rather than configure.
+
+-Werror is enabled for builds from git. The recommended way to turn it off if
+you hit compiler warnings is to pass --disable-Werror to configure.
+
 Once it's built, use the example program to encrypt something:
 
 demos/dumbaes-cli -o output_filename -k private_key_filename -e plaintext_filename
@@ -38,11 +43,6 @@ demos/dumbaes-cli -o output_filename -k private_key_filename -d ciphertext_filen
 
 You can install dumbaes with `sudo make install` if you really want to, but it
 is dumb, so why would you?
-
-If you're building from git, you need to run autogen.sh rather than configure.
-
--Werror is enabled for builds from git. The recommended way to turn it off if
-you hit compiler warnings is to pass --disable-Werror to configure.
 
 Directory layout:
 

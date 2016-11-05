@@ -204,10 +204,25 @@ static void inverse_mix_columns(State& state)
 
 static void add_round_key(State& state, Word w0, Word w1, Word w2, Word w3)
 {
-   state[0] ^= w0;
-   state[1] ^= w1;
-   state[2] ^= w2;
-   state[3] ^= w3;
+   state[0][0] ^= w0[0];
+   state[1][0] ^= w0[1];
+   state[2][0] ^= w0[2];
+   state[3][0] ^= w0[3];
+
+   state[0][1] ^= w1[0];
+   state[1][1] ^= w1[1];
+   state[2][1] ^= w1[2];
+   state[3][1] ^= w1[3];
+
+   state[0][2] ^= w2[0];
+   state[1][2] ^= w2[1];
+   state[2][2] ^= w2[2];
+   state[3][2] ^= w2[3];
+
+   state[0][3] ^= w3[0];
+   state[1][3] ^= w3[1];
+   state[2][3] ^= w3[2];
+   state[3][3] ^= w3[3];
 }
 
 Block encrypt_block(const Block& block, const Key& key)

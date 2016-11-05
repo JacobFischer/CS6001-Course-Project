@@ -41,15 +41,13 @@ PolynomialPolynomial::PolynomialPolynomial(const Polynomial& a3,
 {
 }
 
-PolynomialPolynomial& PolynomialPolynomial::operator+=(
-    const PolynomialPolynomial& rhs)
+PolynomialPolynomial& PolynomialPolynomial::operator+=(PolynomialPolynomial rhs)
 {
     m_value ^= rhs.m_value;
     return *this;
 }
 
-PolynomialPolynomial& PolynomialPolynomial::operator*=(
-    const PolynomialPolynomial& rhs)
+PolynomialPolynomial& PolynomialPolynomial::operator*=(PolynomialPolynomial rhs)
 {
     // FIPS 197 equation 4.12
     Word a = m_value;
@@ -80,13 +78,13 @@ PolynomialPolynomial& PolynomialPolynomial::operator*=(
 }
 
 PolynomialPolynomial operator+(PolynomialPolynomial lhs,
-                               const PolynomialPolynomial& rhs)
+                               PolynomialPolynomial rhs)
 {
     return lhs += rhs;
 }
 
 PolynomialPolynomial operator*(PolynomialPolynomial lhs,
-                               const PolynomialPolynomial& rhs)
+                               PolynomialPolynomial rhs)
 {
     return lhs *= rhs;
 }

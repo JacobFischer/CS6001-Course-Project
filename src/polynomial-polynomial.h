@@ -47,8 +47,8 @@ class PolynomialPolynomial
                          const Polynomial& a1,
                          const Polynomial& a0);
 
-    PolynomialPolynomial& operator+=(const PolynomialPolynomial&);
-    PolynomialPolynomial& operator*=(const PolynomialPolynomial&);
+    PolynomialPolynomial& operator+=(PolynomialPolynomial);
+    PolynomialPolynomial& operator*=(PolynomialPolynomial);
 
     const Word& value() const { return m_value; }
 
@@ -56,9 +56,7 @@ class PolynomialPolynomial
     Word m_value;
 };
 
-PolynomialPolynomial operator+(PolynomialPolynomial,
-                               const PolynomialPolynomial&);
-PolynomialPolynomial operator*(PolynomialPolynomial,
-                               const PolynomialPolynomial&);
+PolynomialPolynomial operator+(PolynomialPolynomial, PolynomialPolynomial);
+PolynomialPolynomial operator*(PolynomialPolynomial, PolynomialPolynomial);
 
 }

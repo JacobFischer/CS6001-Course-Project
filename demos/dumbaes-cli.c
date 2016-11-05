@@ -39,19 +39,6 @@ static char *plaintext_filename = NULL;
 static char *key_filename = NULL;
 static char *output_filename = NULL;
 
-static const GOptionEntry option_entries[] =
-{
-  { "decrypt", 'd', 0, G_OPTION_ARG_FILENAME, &ciphertext_filename,
-    "File to decrypt", "FILE" },
-  { "encrypt", 'e', 0, G_OPTION_ARG_FILENAME, &plaintext_filename,
-    "File to encrypt", "FILE" },
-  { "key", 'k', 0, G_OPTION_ARG_FILENAME, &key_filename,
-    "File containing private key", "FILE" },
-  { "output", 'o', 0, G_OPTION_ARG_FILENAME, &output_filename,
-    "File to use for output", "FILE" },
-  { NULL }
-};
-
 static char *
 read_ciphertext (void)
 {
@@ -244,6 +231,19 @@ out:
 
   return ret;
 }
+
+static const GOptionEntry option_entries[] =
+{
+  { "decrypt", 'd', 0, G_OPTION_ARG_FILENAME, &ciphertext_filename,
+    "File to decrypt", "FILE" },
+  { "encrypt", 'e', 0, G_OPTION_ARG_FILENAME, &plaintext_filename,
+    "File to encrypt", "FILE" },
+  { "key", 'k', 0, G_OPTION_ARG_FILENAME, &key_filename,
+    "File containing private key", "FILE" },
+  { "output", 'o', 0, G_OPTION_ARG_FILENAME, &output_filename,
+    "File to use for output", "FILE" },
+  { NULL }
+};
 
 int
 main (int argc, char **argv)

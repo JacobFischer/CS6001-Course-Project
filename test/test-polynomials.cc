@@ -27,8 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "polynomial.h"
-
+#include "src/polynomial.h"
 #include <glib.h>
 #include <locale.h>
 

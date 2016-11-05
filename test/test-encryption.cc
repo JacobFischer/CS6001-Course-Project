@@ -27,8 +27,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "dumbaes.h"
-
+#include "api/dumbaes.h"
+#include "src/dumbaes.h"
+#include <cstdlib>
+#include <cstring>
 #include <glib.h>
 #include <locale.h>
 
@@ -340,6 +342,29 @@ static void test_encryption_decrypt()
     }
 }
 
+static void test_c_api()
+{
+    for (int i = 0; i < 1000; i++) {
+        unsigned char* input = static_cast<unsigned char*>(std::malloc(16));
+        for (int j = 0; j < 16; j++)
+            input[j] = random_byte();
+
+        unsigned char* key = static_cast<unsigned char*>(std::malloc(16));
+        for (int j = 0; j < 16; j++)
+            key[j] = random_byte();
+
+        unsigned char* ciphertext = ::dumbaes_128_encrypt_block(input, key);
+        unsigned char* plaintext = ::dumbaes_128_decrypt_block(ciphertext, key);
+
+        g_assert_cmpmem(input, 16, plaintext, 16);
+
+        std::free(input);
+        std::free(key);
+        std::free(ciphertext);
+        std::free(plaintext);
+    }
+}
+
 int main(int argc, char* argv[])
 {
     setlocale(LC_ALL, "");
@@ -348,6 +373,7 @@ int main(int argc, char* argv[])
 
     g_test_add_func("/Encryption/state", test_encryption_state);
     g_test_add_func("/Encryption/decrypt", test_encryption_decrypt);
+    g_test_add_func("/Encryption/c_api", test_c_api);
 
     return g_test_run();
 }

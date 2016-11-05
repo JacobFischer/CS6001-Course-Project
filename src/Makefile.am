@@ -1,6 +1,6 @@
-noinst_LTLIBRARIES = libdumbaes.la
+noinst_LTLIBRARIES = libdumbaesinternal.la
 
-libdumbaes_la_SOURCES = \
+libdumbaesinternal_la_SOURCES = \
 	dumbaes.cc			\
 	dumbaes.h			\
 	polynomial.cc			\
@@ -10,8 +10,8 @@ libdumbaes_la_SOURCES = \
 	word.cc				\
 	word.h
 
-libdumbaes_la_CXXFLAGS = $(WARN_CXXFLAGS)
+libdumbaesinternal_la_CXXFLAGS = $(WARN_CXXFLAGS)
 
-libdumbaes_la_LDFLAGS = $(WARN_LDFLAGS) -avoid-version -no-undefined
+libdumbaesinternal_la_LDFLAGS = $(WARN_LDFLAGS) -avoid-version -no-undefined
 
 -include $(top_srcdir)/git.mk

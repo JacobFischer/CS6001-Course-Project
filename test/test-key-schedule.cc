@@ -27,8 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "dumbaes.h"
-
+#include "src/dumbaes.h"
 #include <glib.h>
 #include <locale.h>
 

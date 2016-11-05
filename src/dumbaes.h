@@ -56,6 +56,9 @@ Block encrypt_block(const Block& block, const Key& key);
  */
 Block decrypt_block(const Block& block, const Key& key);
 
+// TODO: Add functions that take an arbitrary-length block of data and a key,
+// encrypt/decrypt the data using the above functions and cipher-block chaining.
+
 // Exposed only for unit tests.
 namespace internal {
 

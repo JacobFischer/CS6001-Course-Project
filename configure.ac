@@ -29,6 +29,7 @@ PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.32])
 
 AC_CONFIG_FILES([
 	Makefile
+	api/Makefile
 	src/Makefile
 	test/Makefile
 ])

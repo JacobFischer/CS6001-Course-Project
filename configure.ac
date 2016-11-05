@@ -9,6 +9,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([configure.ac])
 
+AC_PROG_CC
 AC_PROG_CXX
 
 AX_REQUIRE_DEFINED([AX_COMPILER_FLAGS])
@@ -30,6 +31,7 @@ PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.32])
 AC_CONFIG_FILES([
 	Makefile
 	api/Makefile
+	demos/Makefile
 	src/Makefile
 	test/Makefile
 ])

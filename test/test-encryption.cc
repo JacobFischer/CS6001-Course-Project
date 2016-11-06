@@ -333,9 +333,9 @@ static void test_nettle_comparison(const Block& input,
     // directly: http://www.lysator.liu.se/~nisse/nettle/nettle.html#CBC
 
     Block nettle_output;
-    struct aes128_ctx context;
-    aes128_set_encrypt_key(&context, key.data());
-    aes128_encrypt(&context, 16, nettle_output.data(), input.data());
+    struct ::aes128_ctx context;
+    ::aes128_set_encrypt_key(&context, key.data());
+    ::aes128_encrypt(&context, 16, nettle_output.data(), input.data());
 
     g_assert_cmpmem(dumbaes_output.data(), 16, nettle_output.data(), 16);
 }

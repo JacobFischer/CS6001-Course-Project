@@ -38,6 +38,53 @@ static GtkWidget *result_label = NULL;
 static GFile *input_file = NULL;
 static GFile *key_file = NULL;
 
+// TODO: Figure out how to format an arbitary-length of data when implementing CBC.
+#define BLOCK_FORMAT "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x"
+
+static void
+show_error (const char *error)
+{
+  char *error_markup = g_strdup_printf ("<span color=\"#FF0000\">%s</span>", error);
+  gtk_label_set_markup (GTK_LABEL (result_label), error_markup);
+  gtk_widget_show (result_label);
+  g_free (error_markup);
+}
+
+static char *
+read_file (GFile *file)
+{
+  GError *error = NULL;
+  char *contents;
+  gsize contents_length;
+
+  if (!g_file_get_contents (g_file_get_path (file),
+                            &contents,
+                            &contents_length,
+                            &error))
+    {
+      char *message = g_strdup_printf ("Failed to read %s: %s\n",
+                                       g_file_get_path (file),
+                                       error->message);
+      show_error (message);
+      g_free (message);
+      g_error_free (error);
+      return NULL;
+    }
+
+  // TODO: Remove length restriction when switching to CBC.
+  if (contents_length < 16)
+    {
+      char *message = g_strdup_printf ("Read %" G_GSIZE_FORMAT " bytes from %s, but file must be 16 bytes long\n",
+                                        contents_length, g_file_get_path (file));
+      show_error (message);
+      g_free (contents);
+      g_free (message);
+      return NULL;
+    }
+
+  return contents;
+}
+
 static void
 input_file_set_cb (GtkFileChooserButton *widget)
 {
@@ -57,42 +104,85 @@ key_file_set_cb (GtkFileChooserButton *widget)
 }
 
 static void
-show_error (void)
-{
-  gtk_label_set_markup (GTK_LABEL (result_label),
-                        "<span color=\"#FF0000\">Dumbaes, you need to select both input file and key file!</span>");
-  gtk_widget_show (result_label);
-}
-
-static void
 encrypt_button_activate_cb (GtkButton *button)
 {
+  char *input = NULL;
+  char *key = NULL;
+  unsigned char *ciphertext = NULL;
+  char *ciphertext_string = NULL;
+
   if (input_file == NULL || key_file == NULL)
     {
-      show_error ();
+      show_error ("Dumbaes, you need to select both input file and key file!");
       return;
     }
 
-  // TODO: Encrypt
-  gtk_label_set_text (GTK_LABEL (result_label), "Encrypted text:");
+  input = read_file (input_file);
+  if (input == NULL)
+    goto out;
 
+  key = read_file (key_file);
+  if (key == NULL)
+    goto out;
 
+  // TODO: Use CBC here instead.
+  ciphertext = dumbaes_128_encrypt_block ((unsigned char *)input,
+                                          (unsigned char *)key);
+  ciphertext_string = g_strdup_printf ("Encrypted text: " BLOCK_FORMAT,
+                                       ciphertext[0], ciphertext[1], ciphertext[2], ciphertext[3],
+                                       ciphertext[4], ciphertext[5], ciphertext[6], ciphertext[7],
+                                       ciphertext[8], ciphertext[9], ciphertext[10], ciphertext[11],
+                                       ciphertext[12], ciphertext[13], ciphertext[14], ciphertext[15]);
+
+  gtk_label_set_text (GTK_LABEL (result_label), ciphertext_string);
   gtk_widget_show (result_label);
+
+out:
+  free (ciphertext);
+  g_free (ciphertext_string);
+  g_free (input);
+  g_free (key);
 }
 
 static void
 decrypt_button_activate_cb (GtkButton *button)
 {
+  char *input = NULL;
+  char *key = NULL;
+  unsigned char *plaintext = NULL;
+  char *plaintext_string = NULL;
+
   if (input_file == NULL || key_file == NULL)
     {
-      show_error ();
+      show_error ("Dumbaes, you need to select both input file and key file!");
       return;
     }
 
-  // TODO: Decrypt
-  gtk_label_set_text (GTK_LABEL (result_label), "Decrypted text:");
+  input = read_file (input_file);
+  if (input == NULL)
+    goto out;
 
+  key = read_file (key_file);
+  if (key == NULL)
+    goto out;
+
+  // TODO: Use CBC here instead.
+  plaintext = dumbaes_128_decrypt_block ((unsigned char *)input,
+                                         (unsigned char *)key);
+  plaintext_string = g_strdup_printf ("Encrypted text: " BLOCK_FORMAT,
+                                      plaintext[0], plaintext[1], plaintext[2], plaintext[3],
+                                      plaintext[4], plaintext[5], plaintext[6], plaintext[7],
+                                      plaintext[8], plaintext[9], plaintext[10], plaintext[11],
+                                      plaintext[12], plaintext[13], plaintext[14], plaintext[15]);
+
+  gtk_label_set_text (GTK_LABEL (result_label), plaintext_string);
   gtk_widget_show (result_label);
+
+out:
+  free (plaintext);
+  g_free (plaintext_string);
+  g_free (input);
+  g_free (key);
 }
 
 static void

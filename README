@@ -11,7 +11,7 @@ Requirements for tarball builds:
  * A C++14 compiler for binary literals. (GCC 5 should work. Tested with GCC 6.)
  * GLib >= 2.32 (only for the tests and demos).
  * GTK+ >= 3.10 (only for the demo GUI).
- * That's it!
+ * nettle >= 3.0 (only for the tests).
 
 Additional requirements for builds from git:
 
@@ -55,3 +55,7 @@ Directory layout:
 -- m4/ - M4sh build goo. Nothing interesting here either.
 -- src/ - Cryptography implementation
 -- test/ - Tests of course
+
+Note that we do use nettle, but only in the tests and solely for the purpose of
+verifying that our output matches that of an established cryptographic library.
+We have opted not to use OpenSSL because nobody likes it.

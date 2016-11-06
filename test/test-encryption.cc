@@ -32,6 +32,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <glib.h>
+#include <nettle/aes.h>
 
 using namespace dumbaes;
 
@@ -320,9 +321,28 @@ static uint8_t random_byte()
     return g_test_rand_int_range(0, 0xff);
 }
 
+static void test_nettle_comparison(const Block& input,
+                                   const Key& key,
+                                   const Block& dumbaes_output)
+{
+    // TODO: Once CBC is implemented, add a test that uses nettle with different
+    // sizes of input blocks and verifies that our output is the same. That will
+    // require changing this function to accept strings instead of blocks, and
+    // not hardcoding 16 bytes here.
+    Block nettle_output;
+    struct aes128_ctx context;
+    aes128_set_encrypt_key(&context, key.data());
+    aes128_encrypt(&context, 16, nettle_output.data(), input.data());
+
+    g_assert_cmpmem(dumbaes_output.data(), 16, nettle_output.data(), 16);
+}
+
+
 static void test_encryption_decrypt()
 {
-    for (int i = 0; i < 1000; i++) {
+    // 10000 runs and the output is still instantaneous... AES is fast.
+    // 100000 runs and it takes a little while to finish.
+    for (int i = 0; i < 10000; i++) {
         Block input = {random_byte(), random_byte(), random_byte(), random_byte(),
                        random_byte(), random_byte(), random_byte(), random_byte(),
                        random_byte(), random_byte(), random_byte(), random_byte(),
@@ -333,9 +353,12 @@ static void test_encryption_decrypt()
                    random_byte(), random_byte(), random_byte(), random_byte(),
                    random_byte(), random_byte(), random_byte(), random_byte()};
 
+        // Verify that our result is the same as what nettle gives.
         Block ciphertext = encrypt_block(input, key);
-        Block plaintext = decrypt_block(ciphertext, key);
+        test_nettle_comparison(input, key, ciphertext);
 
+        // Verify that our decrypted result is the same as what we passed in.
+        Block plaintext = decrypt_block(ciphertext, key);
         for (int j = 0; j < 16; j++)
             g_assert_cmphex(input[j], ==, plaintext[j]);
     }

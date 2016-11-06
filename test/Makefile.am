@@ -8,11 +8,13 @@ TESTS = $(check_PROGRAMS)
 LDADD = \
 	$(top_builddir)/api/libdumbaes.la		\
 	$(top_builddir)/src/libdumbaesinternal.la	\
-	$(GLIB_LIBS)
+	$(GLIB_LIBS)	\
+	$(NETTLE_LIBS)
 
 AM_CPPFLAGS = \
 	-I$(top_srcdir)	\
-	$(GLIB_CFLAGS)
+	$(GLIB_CFLAGS)	\
+	$(NETTLE_CFLAGS)
 
 AM_CXXFLAGS = $(WARN_CXXFLAGS)
 

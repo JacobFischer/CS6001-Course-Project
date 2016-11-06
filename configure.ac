@@ -28,6 +28,7 @@ LT_INIT([disable-static])
 AX_REQUIRE_DEFINED([PKG_CHECK_MODULES])
 PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.32])
 PKG_CHECK_MODULES([GIO], [gio-2.0 >= 2.32])
+PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.10])
 
 AC_CONFIG_FILES([
 	Makefile

@@ -13,6 +13,9 @@ Requirements for tarball builds:
  * GTK+ >= 3.10 (only for the demo GUI).
  * nettle >= 3.0 (only for the tests).
 
+Those versions are pretty much arbitrary guesses and are not enforced at
+configure time. Older package versions may or may not be sufficient.
+
 Additional requirements for builds from git:
 
  * autoconf, automake, libtool

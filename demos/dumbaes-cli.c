@@ -1,4 +1,4 @@
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
  *
  * Copyright (c) 2016 Michael Catanzaro <michael.catanzaro@mst.edu>
  * Copyright (c) 2016 Jacob Fischer <jtf3m8@mst.edu>

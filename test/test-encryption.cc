@@ -328,7 +328,10 @@ static void test_nettle_comparison(const Block& input,
     // TODO: Once CBC is implemented, add a test that uses nettle with different
     // sizes of input blocks and verifies that our output is the same. That will
     // require changing this function to accept strings instead of blocks, and
-    // not hardcoding 16 bytes here.
+    // not hardcoding 16 bytes here. It will also require passing
+    // aes128_encrypt() as a parameter to CBC_ENCRYPT() instead of calling it
+    // directly: http://www.lysator.liu.se/~nisse/nettle/nettle.html#CBC
+
     Block nettle_output;
     struct aes128_ctx context;
     aes128_set_encrypt_key(&context, key.data());

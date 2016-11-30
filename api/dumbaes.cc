@@ -68,6 +68,9 @@ unsigned char* dumbaes_128_decrypt_block(const unsigned char* ciphertext,
 }
 
 #if 0
+// TODO: Note these functions should just be C API wrappers around C++
+// functions implemented in the src/ directory.
+
 unsigned char* dumbaes_128_encrypt_cbc(const unsigned char* plaintext,
                                        size_t length,
                                        const unsigned char* key)

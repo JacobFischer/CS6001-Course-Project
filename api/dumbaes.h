@@ -67,33 +67,37 @@ unsigned char *dumbaes_128_decrypt_block (const unsigned char *ciphertext,
 
 /**
  * dumbaes_128_encrypt_cbc:
- * @plaintext: the %NULL-terminated plaintext to encrypt
+ * @plaintext: the plaintext to encrypt
+ * @length: length of the plaintext to encrypt, in bytes
  * @key: the private key to use for the encryption
  *
- * Encrypts an arbitrary-length %NULL-terminated @plaintext using the
- * private key @key. @key must be exactly 16 bytes long and need not be
- * %NULL-terminated. The data will be encrypted using cipher block
- * chaining.
+ * Encrypts a @plaintext of length @length using the private key @key.
+ * @key must be exactly 16 bytes long and need not be %NULL-terminated.
+ * The data will be encrypted using cipher block chaining. Note that
+ * both @plaintext and @key may contain embedded %NULL characters.
  *
- * Returns: %NULL-terminated ciphertext. Free with free().
+ * Returns: ciphertext of length @length. Free with free().
  */
-char *dumbaes_128_encrypt_cbc (const char          *plaintext,
-                               const unsigned char *key);
+unsigned char *dumbaes_128_encrypt_cbc (const unsigned char *plaintext,
+                                        size_t               length,
+                                        const unsigned char *key);
 
 /**
  * dumbaes_128_decrypt_cbc:
- * @ciphertext: the %NULL-terminated ciphertext to decrypt
+ * @ciphertext: the ciphertext to decrypt
+ * @length: length of the ciphertext to decrypt, in bytes
  * @key: the private key to use for the decryption
  *
- * Decrypts an arbitrary-length %NULL-terminated @ciphertext using the
- * private key @key. @key must be exactly 16 bytes long and need not be
- * %NULL-terminated. The data will be decrypted using cipher block
- * chaining.
+ * Decrypts a @ciphertext encrypted by dumbaes_128_encrypt_cbc() of
+ * length @length using the private key @key. @key must be exactly 16
+ * bytes long and need not be %NULL-terminated. Note that both
+ * @plaintext and @key may contain embedded %NULL characters.
  *
- * Returns: %NULL-terminated plaintext. Free with free().
+ * Returns: plaintext of length @length. Free with free().
  */
-char *dumbaes_128_encrypt_cbc (const char          *ciphertext,
-                               const unsigned char *key);
+unsigned char *dumbaes_128_encrypt_cbc (const char          *ciphertext,
+                                        size_t               length,
+                                        const unsigned char *key);
 
 #endif
 

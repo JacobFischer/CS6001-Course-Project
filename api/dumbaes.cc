@@ -68,12 +68,16 @@ unsigned char* dumbaes_128_decrypt_block(const unsigned char* ciphertext,
 }
 
 #if 0
-char* dumbaes_128_encrypt_cbc(const char* plaintext, const unsigned char* key)
+unsigned char* dumbaes_128_encrypt_cbc(const unsigned char* plaintext,
+                                       size_t               length,
+                                       const unsigned char* key)
 {
     // TODO
 }
 
-char* dumbaes_128_decrypt_cbc(const char* ciphertext, const unsigned char* key)
+unsigned char* dumbaes_128_decrypt_cbc(const unsigned char* ciphertext,
+                                       size_t               length,
+                                       const unsigned char* key)
 {
     // TODO
 }

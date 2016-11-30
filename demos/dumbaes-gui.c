@@ -328,8 +328,12 @@ create_ui (void)
                     G_CALLBACK (key_file_set_cb), NULL);
   gtk_box_pack_end (GTK_BOX (hbox), widget, FALSE, FALSE, 0);
 
+  result_label = gtk_label_new (NULL);
+  gtk_widget_set_no_show_all (result_label, TRUE);
+  gtk_box_pack_start (GTK_BOX (vbox), result_label, FALSE, FALSE, 6);
+
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
+  gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
   widget = gtk_button_new_with_mnemonic ("_Encrypt");
   g_signal_connect (widget, "clicked",
@@ -340,10 +344,6 @@ create_ui (void)
   g_signal_connect (widget, "clicked",
                     G_CALLBACK (decrypt_button_activate_cb), NULL);
   gtk_box_pack_end (GTK_BOX (hbox), widget, FALSE, FALSE, 24);
-
-  result_label = gtk_label_new (NULL);
-  gtk_widget_set_no_show_all (result_label, TRUE);
-  gtk_box_pack_end (GTK_BOX (vbox), result_label, FALSE, FALSE, 6);
 
   gtk_widget_show_all (vbox);
 }

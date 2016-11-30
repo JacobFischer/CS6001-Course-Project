@@ -39,7 +39,7 @@ static GtkWidget *result_label = NULL;
 static GtkWidget *save_button = NULL;
 static GFile *input_file = NULL;
 static GFile *key_file = NULL;
-static char *result_string = NULL;
+static unsigned char *result = NULL;
 static gboolean displaying_ciphertext = FALSE;
 
 // TODO: Figure out how to format an arbitary-length of data when implementing CBC.
@@ -112,7 +112,6 @@ encrypt_button_activate_cb (void)
 {
   char *input = NULL;
   char *key = NULL;
-  unsigned char *ciphertext = NULL;
   char *display_string = NULL;
 
   if (input_file == NULL || key_file == NULL)
@@ -129,20 +128,14 @@ encrypt_button_activate_cb (void)
   if (key == NULL)
     goto out;
 
-  // TODO: Use CBC here instead. Just assign the result straight to
-  // result_string and get rid of the ciphertext variable; no need to malloc
-  // memory or copy it because it will be NULL-terminated already.
-  ciphertext = dumbaes_128_encrypt_block ((unsigned char *)input,
-                                          (unsigned char *)key);
-  g_clear_pointer (&result_string, g_free);
-  result_string = g_malloc0 (17);
-  strncpy (result_string, (const char *)ciphertext, 16);
-
+  // TODO: Use CBC here instead.
+  g_clear_pointer (&result, free);
+  result = dumbaes_128_encrypt_block ((unsigned char *)input, (unsigned char *)key);
   display_string = g_strdup_printf ("Encrypted text: " BLOCK_FORMAT,
-                                    ciphertext[0], ciphertext[1], ciphertext[2], ciphertext[3],
-                                    ciphertext[4], ciphertext[5], ciphertext[6], ciphertext[7],
-                                    ciphertext[8], ciphertext[9], ciphertext[10], ciphertext[11],
-                                    ciphertext[12], ciphertext[13], ciphertext[14], ciphertext[15]);
+                                    result[0], result[1], result[2], result[3],
+                                    result[4], result[5], result[6], result[7],
+                                    result[8], result[9], result[10], result[11],
+                                    result[12], result[13], result[14], result[15]);
   gtk_label_set_text (GTK_LABEL (result_label), display_string);
   gtk_widget_show (result_label);
 
@@ -150,7 +143,6 @@ encrypt_button_activate_cb (void)
   displaying_ciphertext = TRUE;
 
 out:
-  free (ciphertext);
   g_free (display_string);
   g_free (input);
   g_free (key);
@@ -161,7 +153,6 @@ decrypt_button_activate_cb (void)
 {
   char *input = NULL;
   char *key = NULL;
-  unsigned char *plaintext = NULL;
   char *display_string = NULL;
 
   if (input_file == NULL || key_file == NULL)
@@ -178,20 +169,14 @@ decrypt_button_activate_cb (void)
   if (key == NULL)
     goto out;
 
-  // TODO: Use CBC here instead. Just assign the result straight to
-  // result_string and get rid of the ciphertext variable; no need to malloc
-  // memory or copy it because it will be NULL-terminated already.
-  plaintext = dumbaes_128_decrypt_block ((unsigned char *)input,
-                                         (unsigned char *)key);
-  g_clear_pointer (&result_string, g_free);
-  result_string = g_malloc0 (17);
-  strncpy (result_string, (const char *)plaintext, 16);
-
+  // TODO: Use CBC here instead.
+  g_clear_pointer (&result, free);
+  result = dumbaes_128_decrypt_block ((unsigned char *)input, (unsigned char *)key);
   display_string = g_strdup_printf ("Encrypted text: " BLOCK_FORMAT,
-                                    plaintext[0], plaintext[1], plaintext[2], plaintext[3],
-                                    plaintext[4], plaintext[5], plaintext[6], plaintext[7],
-                                    plaintext[8], plaintext[9], plaintext[10], plaintext[11],
-                                    plaintext[12], plaintext[13], plaintext[14], plaintext[15]);
+                                    result[0], result[1], result[2], result[3],
+                                    result[4], result[5], result[6], result[7],
+                                    result[8], result[9], result[10], result[11],
+                                    result[12], result[13], result[14], result[15]);
   gtk_label_set_text (GTK_LABEL (result_label), display_string);
   gtk_widget_show (result_label);
 
@@ -199,7 +184,6 @@ decrypt_button_activate_cb (void)
   displaying_ciphertext = FALSE;
 
 out:
-  free (plaintext);
   g_free (display_string);
   g_free (input);
   g_free (key);
@@ -225,9 +209,11 @@ write_to_output_file (const char *output_filename)
       goto out;
     }
 
+  // TODO: When switching to CBC, the third argument must be set to the right length.
+  // Beware that |result| can contain embedded NULLs.
   if (!g_output_stream_write_all (g_io_stream_get_output_stream (G_IO_STREAM (iostream)),
-                                  result_string,
-                                  strlen (result_string),
+                                  result,
+                                  16,
                                   &bytes_written,
                                   NULL,
                                   &error))
@@ -378,8 +364,8 @@ main (int argc, char **argv)
     g_object_unref (input_file);
   if (key_file != NULL)
     g_object_unref (key_file);
-  if (result_string != NULL)
-    g_free (result_string);
+  if (result != NULL)
+    free (result);
 
   return ret;
 }

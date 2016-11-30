@@ -104,7 +104,7 @@ key_file_set_cb (GtkFileChooserButton *widget)
 }
 
 static void
-encrypt_button_activate_cb (GtkButton *button)
+encrypt_button_activate_cb (void)
 {
   char *input = NULL;
   char *key = NULL;
@@ -145,7 +145,7 @@ out:
 }
 
 static void
-decrypt_button_activate_cb (GtkButton *button)
+decrypt_button_activate_cb (void)
 {
   char *input = NULL;
   char *key = NULL;

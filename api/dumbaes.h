@@ -99,6 +99,43 @@ unsigned char *dumbaes_128_encrypt_cbc (const char          *ciphertext,
                                         size_t               length,
                                         const unsigned char *key);
 
+/**
+ * dumbaes_128_encrypt_cecb:
+ * @plaintext: the plaintext to encrypt
+ * @length: length of the plaintext to encrypt, in bytes
+ * @key: the private key to use for the encryption
+ *
+ * Encrypts a @plaintext of length @length using the private key @key.
+ * @key must be exactly 16 bytes long and need not be %NULL-terminated.
+ * The data will be encrypted using electronic codebook mode. Note that
+ * both @plaintext and @key may contain embedded %NULL characters. Also
+ * note that this function is insecure and should not be used with data
+ * that is more than 16 bytes long. Use dumbaes_128_encrypt_cbc()
+ * instead.
+ *
+ * Returns: ciphertext of length @length. Free with free().
+ */
+unsigned char *dumbaes_128_encrypt_ecb (const unsigned char *plaintext,
+                                        size_t               length,
+                                        const unsigned char *key);
+
+/**
+ * dumbaes_128_decrypt_ecb:
+ * @ciphertext: the ciphertext to decrypt
+ * @length: length of the ciphertext to decrypt, in bytes
+ * @key: the private key to use for the decryption
+ *
+ * Decrypts a @ciphertext encrypted by dumbaes_128_encrypt_ecb() of
+ * length @length using the private key @key. @key must be exactly 16
+ * bytes long and need not be %NULL-terminated. Note that both
+ * @plaintext and @key may contain embedded %NULL characters.
+ *
+ * Returns: plaintext of length @length. Free with free().
+ */
+unsigned char *dumbaes_128_encrypt_ecb (const char          *ciphertext,
+                                        size_t               length,
+                                        const unsigned char *key);
+
 #endif
 
 #ifdef __cplusplus

@@ -81,4 +81,18 @@ unsigned char* dumbaes_128_decrypt_cbc(const unsigned char* ciphertext,
 {
     // TODO
 }
+
+unsigned char* dumbaes_128_encrypt_ecb(const unsigned char* plaintext,
+                                       size_t               length,
+                                       const unsigned char* key)
+{
+    // TODO
+}
+
+unsigned char* dumbaes_128_decrypt_ecb(const unsigned char* ciphertext,
+                                       size_t               length,
+                                       const unsigned char* key)
+{
+    // TODO
+}
 #endif

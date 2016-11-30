@@ -69,28 +69,28 @@ unsigned char* dumbaes_128_decrypt_block(const unsigned char* ciphertext,
 
 #if 0
 unsigned char* dumbaes_128_encrypt_cbc(const unsigned char* plaintext,
-                                       size_t               length,
+                                       size_t length,
                                        const unsigned char* key)
 {
     // TODO
 }
 
 unsigned char* dumbaes_128_decrypt_cbc(const unsigned char* ciphertext,
-                                       size_t               length,
+                                       size_t length,
                                        const unsigned char* key)
 {
     // TODO
 }
 
 unsigned char* dumbaes_128_encrypt_ecb(const unsigned char* plaintext,
-                                       size_t               length,
+                                       size_t length,
                                        const unsigned char* key)
 {
     // TODO
 }
 
 unsigned char* dumbaes_128_decrypt_ecb(const unsigned char* ciphertext,
-                                       size_t               length,
+                                       size_t length,
                                        const unsigned char* key)
 {
     // TODO

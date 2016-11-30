@@ -146,9 +146,8 @@ write_to_output_file (const unsigned char *output)
       goto out;
     }
 
-  // TODO: When switching to CBC, this function should receive a NULL-terminated
-  // const char * instead of a const unsigned char *, and the third argument to
-  // g_output_stream_write_all() should use strlen() rather than be hardcoded.
+  // TODO: When switching to CBC, the third argument must be set to the right length.
+  // Beware that |output| can contain embedded NULLs.
   if (!g_output_stream_write_all (g_io_stream_get_output_stream (G_IO_STREAM (iostream)),
                                   output,
                                   16,

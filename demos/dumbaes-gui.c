@@ -32,11 +32,15 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 #include <stdlib.h>
+#include <string.h>
 
 static GtkWidget *window = NULL;
 static GtkWidget *result_label = NULL;
+static GtkWidget *save_button = NULL;
 static GFile *input_file = NULL;
 static GFile *key_file = NULL;
+static char *result_string = NULL;
+static gboolean displaying_ciphertext = FALSE;
 
 // TODO: Figure out how to format an arbitary-length of data when implementing CBC.
 #define BLOCK_FORMAT "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x"
@@ -109,7 +113,7 @@ encrypt_button_activate_cb (void)
   char *input = NULL;
   char *key = NULL;
   unsigned char *ciphertext = NULL;
-  char *ciphertext_string = NULL;
+  char *display_string = NULL;
 
   if (input_file == NULL || key_file == NULL)
     {
@@ -125,21 +129,29 @@ encrypt_button_activate_cb (void)
   if (key == NULL)
     goto out;
 
-  // TODO: Use CBC here instead.
+  // TODO: Use CBC here instead. Just assign the result straight to
+  // result_string and get rid of the ciphertext variable; no need to malloc
+  // memory or copy it because it will be NULL-terminated already.
   ciphertext = dumbaes_128_encrypt_block ((unsigned char *)input,
                                           (unsigned char *)key);
-  ciphertext_string = g_strdup_printf ("Encrypted text: " BLOCK_FORMAT,
-                                       ciphertext[0], ciphertext[1], ciphertext[2], ciphertext[3],
-                                       ciphertext[4], ciphertext[5], ciphertext[6], ciphertext[7],
-                                       ciphertext[8], ciphertext[9], ciphertext[10], ciphertext[11],
-                                       ciphertext[12], ciphertext[13], ciphertext[14], ciphertext[15]);
+  g_clear_pointer (&result_string, g_free);
+  result_string = g_malloc0 (17);
+  strncpy (result_string, (const char *)ciphertext, 16);
 
-  gtk_label_set_text (GTK_LABEL (result_label), ciphertext_string);
+  display_string = g_strdup_printf ("Encrypted text: " BLOCK_FORMAT,
+                                    ciphertext[0], ciphertext[1], ciphertext[2], ciphertext[3],
+                                    ciphertext[4], ciphertext[5], ciphertext[6], ciphertext[7],
+                                    ciphertext[8], ciphertext[9], ciphertext[10], ciphertext[11],
+                                    ciphertext[12], ciphertext[13], ciphertext[14], ciphertext[15]);
+  gtk_label_set_text (GTK_LABEL (result_label), display_string);
   gtk_widget_show (result_label);
+
+  gtk_widget_set_sensitive (save_button, TRUE);
+  displaying_ciphertext = TRUE;
 
 out:
   free (ciphertext);
-  g_free (ciphertext_string);
+  g_free (display_string);
   g_free (input);
   g_free (key);
 }
@@ -150,7 +162,7 @@ decrypt_button_activate_cb (void)
   char *input = NULL;
   char *key = NULL;
   unsigned char *plaintext = NULL;
-  char *plaintext_string = NULL;
+  char *display_string = NULL;
 
   if (input_file == NULL || key_file == NULL)
     {
@@ -166,28 +178,101 @@ decrypt_button_activate_cb (void)
   if (key == NULL)
     goto out;
 
-  // TODO: Use CBC here instead.
+  // TODO: Use CBC here instead. Just assign the result straight to
+  // result_string and get rid of the ciphertext variable; no need to malloc
+  // memory or copy it because it will be NULL-terminated already.
   plaintext = dumbaes_128_decrypt_block ((unsigned char *)input,
                                          (unsigned char *)key);
-  plaintext_string = g_strdup_printf ("Encrypted text: " BLOCK_FORMAT,
-                                      plaintext[0], plaintext[1], plaintext[2], plaintext[3],
-                                      plaintext[4], plaintext[5], plaintext[6], plaintext[7],
-                                      plaintext[8], plaintext[9], plaintext[10], plaintext[11],
-                                      plaintext[12], plaintext[13], plaintext[14], plaintext[15]);
+  g_clear_pointer (&result_string, g_free);
+  result_string = g_malloc0 (17);
+  strncpy (result_string, (const char *)plaintext, 16);
 
-  gtk_label_set_text (GTK_LABEL (result_label), plaintext_string);
+  display_string = g_strdup_printf ("Encrypted text: " BLOCK_FORMAT,
+                                    plaintext[0], plaintext[1], plaintext[2], plaintext[3],
+                                    plaintext[4], plaintext[5], plaintext[6], plaintext[7],
+                                    plaintext[8], plaintext[9], plaintext[10], plaintext[11],
+                                    plaintext[12], plaintext[13], plaintext[14], plaintext[15]);
+  gtk_label_set_text (GTK_LABEL (result_label), display_string);
   gtk_widget_show (result_label);
+
+  gtk_widget_set_sensitive (save_button, TRUE);
+  displaying_ciphertext = FALSE;
 
 out:
   free (plaintext);
-  g_free (plaintext_string);
+  g_free (display_string);
   g_free (input);
   g_free (key);
 }
 
 static void
+write_to_output_file (const char *output_filename)
+{
+  GFile *file;
+  GFileIOStream *iostream;
+  gsize bytes_written;
+  char *error_message;
+  GError *error = NULL;
+
+  file = g_file_new_for_path (output_filename);
+  iostream = g_file_replace_readwrite (file, NULL, FALSE, 0, NULL, &error);
+  if (iostream == NULL)
+    {
+      error_message = g_strdup_printf ("Failed to open %s for writing: %s\n", output_filename, error->message);
+      show_error (error_message);
+      g_free (error_message);
+      g_error_free (error);
+      goto out;
+    }
+
+  if (!g_output_stream_write_all (g_io_stream_get_output_stream (G_IO_STREAM (iostream)),
+                                  result_string,
+                                  strlen (result_string),
+                                  &bytes_written,
+                                  NULL,
+                                  &error))
+    {
+      error_message = g_strdup_printf ("Failed to write to %s: %s\n", output_filename, error->message);
+      show_error (error_message);
+      g_free (error_message);
+      g_error_free (error);
+    }
+
+out:
+  g_object_unref (file);
+
+  if (iostream != NULL)
+    g_object_unref (iostream);
+}
+
+static void
 save_button_clicked_cb (void)
 {
+  GtkWidget *dialog;
+  char *filename;
+  gint response;
+
+  dialog = gtk_file_chooser_dialog_new (displaying_ciphertext ? "Save Ciphertext" : "Save Plaintext",
+                                        GTK_WINDOW (window),
+                                        GTK_FILE_CHOOSER_ACTION_SAVE,
+                                        "_Cancel",
+                                        GTK_RESPONSE_CANCEL,
+                                        "_Save",
+                                        GTK_RESPONSE_ACCEPT,
+                                        NULL);
+  gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER (dialog), TRUE);
+  gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (dialog),
+                                     displaying_ciphertext ? "My ciphertext" : "My plaintext");
+
+  response = gtk_dialog_run (GTK_DIALOG (dialog));
+  if (response == GTK_RESPONSE_ACCEPT)
+    {
+      filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
+      write_to_output_file (filename);
+      g_free (filename);
+    }
+
+  gtk_widget_destroy (dialog);
 }
 
 static void
@@ -196,22 +281,22 @@ create_ui (void)
   GtkWidget *vbox;
   GtkWidget *hbox;
   GtkWidget *widget;
-  GtkWidget *headerbar;
   GtkStyleContext *context;
 
-  headerbar = gtk_header_bar_new ();
-  gtk_header_bar_set_title (GTK_HEADER_BAR (headerbar), g_get_application_name ());
-  gtk_header_bar_set_show_close_button (GTK_HEADER_BAR (headerbar), TRUE);
-  gtk_window_set_titlebar (GTK_WINDOW (window), headerbar);
-  gtk_widget_show (headerbar);
-
-  widget = gtk_button_new_with_mnemonic ("_Save");
-  g_signal_connect (widget, "clicked",
-                    G_CALLBACK (save_button_clicked_cb), NULL);
-  gtk_header_bar_pack_start (GTK_HEADER_BAR (headerbar), widget);
+  widget = gtk_header_bar_new ();
+  gtk_header_bar_set_title (GTK_HEADER_BAR (widget), g_get_application_name ());
+  gtk_header_bar_set_show_close_button (GTK_HEADER_BAR (widget), TRUE);
+  gtk_window_set_titlebar (GTK_WINDOW (window), widget);
   gtk_widget_show (widget);
 
-  context = gtk_widget_get_style_context (widget);
+  save_button = gtk_button_new_with_mnemonic ("_Save");
+  g_signal_connect (save_button, "clicked",
+                    G_CALLBACK (save_button_clicked_cb), NULL);
+  gtk_header_bar_pack_start (GTK_HEADER_BAR (widget), save_button);
+  gtk_widget_set_sensitive (save_button, FALSE);
+  gtk_widget_show (save_button);
+
+  context = gtk_widget_get_style_context (save_button);
   gtk_style_context_add_class (context, "text-button");
   gtk_style_context_add_class (context, "suggested-action");
 
@@ -293,6 +378,8 @@ main (int argc, char **argv)
     g_object_unref (input_file);
   if (key_file != NULL)
     g_object_unref (key_file);
+  if (result_string != NULL)
+    g_free (result_string);
 
   return ret;
 }

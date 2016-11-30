@@ -335,6 +335,13 @@ create_ui (void)
 }
 
 static void
+application_startup_cb (GApplication *application)
+{
+  const char * const quit_accels[] = { "<Primary>Q", "<Primary>W", NULL };
+  gtk_application_set_accels_for_action (GTK_APPLICATION (application), "app.quit", quit_accels);
+}
+
+static void
 application_activate_cb (GApplication *application)
 {
   if (window != NULL)
@@ -345,18 +352,32 @@ application_activate_cb (GApplication *application)
   gtk_window_present (GTK_WINDOW (window));
 }
 
+static void
+quit_cb (GSimpleAction *action,
+         GVariant      *parameter,
+         gpointer       user_data)
+{
+  GApplication *application = G_APPLICATION (user_data);
+  g_application_quit (application);
+}
+
 int
 main (int argc, char **argv)
 {
   GtkApplication *application;
   int ret;
+  const GActionEntry entries[] = {
+    {"quit", quit_cb, NULL, NULL, NULL}
+  };
 
   g_set_application_name ("Dumb AES Demo");
 
   application = gtk_application_new ("edu.mst.dumbaes", G_APPLICATION_FLAGS_NONE);
+  g_action_map_add_action_entries (G_ACTION_MAP (application), entries, G_N_ELEMENTS (entries), application);
+  g_signal_connect (application, "startup",
+                    G_CALLBACK (application_startup_cb), application);
   g_signal_connect (application, "activate",
-                    G_CALLBACK (application_activate_cb), NULL);
-
+                    G_CALLBACK (application_activate_cb), application);
   ret = g_application_run (G_APPLICATION (application), argc, argv);
 
   g_object_unref (application);

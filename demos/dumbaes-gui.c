@@ -186,17 +186,34 @@ out:
 }
 
 static void
+save_button_clicked_cb (void)
+{
+}
+
+static void
 create_ui (void)
 {
   GtkWidget *vbox;
   GtkWidget *hbox;
   GtkWidget *widget;
+  GtkWidget *headerbar;
+  GtkStyleContext *context;
 
-  widget = gtk_header_bar_new ();
-  gtk_header_bar_set_title (GTK_HEADER_BAR (widget), g_get_application_name ());
-  gtk_header_bar_set_show_close_button (GTK_HEADER_BAR (widget), TRUE);
-  gtk_window_set_titlebar (GTK_WINDOW (window), widget);
+  headerbar = gtk_header_bar_new ();
+  gtk_header_bar_set_title (GTK_HEADER_BAR (headerbar), g_get_application_name ());
+  gtk_header_bar_set_show_close_button (GTK_HEADER_BAR (headerbar), TRUE);
+  gtk_window_set_titlebar (GTK_WINDOW (window), headerbar);
+  gtk_widget_show (headerbar);
+
+  widget = gtk_button_new_with_mnemonic ("_Save");
+  g_signal_connect (widget, "clicked",
+                    G_CALLBACK (save_button_clicked_cb), NULL);
+  gtk_header_bar_pack_start (GTK_HEADER_BAR (headerbar), widget);
   gtk_widget_show (widget);
+
+  context = gtk_widget_get_style_context (widget);
+  gtk_style_context_add_class (context, "text-button");
+  gtk_style_context_add_class (context, "suggested-action");
 
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
   g_object_set (vbox, "margin", 12, NULL);

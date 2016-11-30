@@ -192,6 +192,12 @@ create_ui (void)
   GtkWidget *hbox;
   GtkWidget *widget;
 
+  widget = gtk_header_bar_new ();
+  gtk_header_bar_set_title (GTK_HEADER_BAR (widget), g_get_application_name ());
+  gtk_header_bar_set_show_close_button (GTK_HEADER_BAR (widget), TRUE);
+  gtk_window_set_titlebar (GTK_WINDOW (window), widget);
+  gtk_widget_show (widget);
+
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
   g_object_set (vbox, "margin", 12, NULL);
   gtk_container_add (GTK_CONTAINER (window), vbox);
@@ -257,7 +263,7 @@ main (int argc, char **argv)
   GtkApplication *application;
   int ret;
 
-  g_set_application_name ("Dumb AES Demo GUI");
+  g_set_application_name ("Dumb AES Demo");
 
   application = gtk_application_new ("edu.mst.dumbaes", G_APPLICATION_FLAGS_NONE);
   g_signal_connect (application, "activate",

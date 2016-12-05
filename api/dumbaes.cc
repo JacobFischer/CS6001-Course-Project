@@ -96,95 +96,33 @@ unsigned char* dumbaes_128_encrypt_ecb(const unsigned char* plaintext,
                                        const unsigned char* key)
 {
     Key keyblock;
-    //printf("Orig: %s\n",plaintext);
     std::memcpy(keyblock.data(), key, 16);
 
     int num_blocks = length / 16 + 1;
-    //num_blocks += ((length%16) ? 1:0);
-    //printf("%d\n",num_blocks);
-    
-    //Block new_plaintext[num_blocks];
-    //Block ciphertext[num_blocks];
     std::unique_ptr<Block> plaintext_array[num_blocks];
     std::unique_ptr<Block> ciphertext_array[num_blocks];
     
-    /*
-    std::unique_ptr<Block* []> plaintext_array[num_blocks];//(new Block*[num_blocks]);
     for(int block=0; block < num_blocks-1; block++)
     {
-        
-        std::memcpy(plaintext_array[block]->data(), plaintext+(16*block), 16);
-        printf("Blocksmp: %s\n", plaintext_array[block]->data());
-    }
-    */
-    /*
-    Block **plaintext_array;
-    plaintext_array = new Block *[num_blocks];
-    plaintext_array[0] = new Block;
-    */
-    //std::unique_ptr< unique_ptr<Block[]> > plaintext_array(new uni
-    
-    /*
-    std::unique_ptr<Block> test_ptr[2];//(new Block);
-    test_ptr[0].reset(new Block);
-    test_ptr[1].reset(new Block);
-    std::memcpy(test_ptr[0]->data(), plaintext, 16);
-    std::memcpy(test_ptr[1]->data(), plaintext+16, 16);
-    printf("Ptr_test: %s\n", test_ptr[0]->data());
-    printf("Ptr_test: %s\n", test_ptr[1]->data());
-    */
-    for(int block=0; block < num_blocks-1; block++)
-    {
-        //printf("Block: %d\n", block);
         plaintext_array[block].reset(new Block);
         std::memcpy(plaintext_array[block]->data(), plaintext+(16*block), 16);
-        //std::memcpy(new_plaintext[block].data(), plaintext+(16*block), 16);
-        //printf("Result: %s\n",new_plaintext[block].data());
     }
     plaintext_array[num_blocks-1].reset(new Block);
     std::memcpy(plaintext_array[num_blocks-1]->data(),
                (plaintext+(16*(num_blocks-1))), (length-(16*(num_blocks-1))));
-    //new_plaintext[num_blocks-1].fill('0');// = "0000000000000000";
-    /*
-    printf("Block: %d\n", num_blocks-1);
-    printf("Result: %s\n",new_plaintext[num_blocks-1].data());
-    printf("Result: %s\n",new_plaintext[0].data());
-    */
-    //std::memcpy(new_plaintext[0].data(), plaintext+(16*0), 16);
-    //new_plaintext[num_blocks-1].fill('0');
-    //printf("Grab: %d\n",length-(16*(num_blocks-1)));
-    //printf("At: %d\n", (16*(num_blocks-1)));
-    //std::memcpy(new_plaintext[num_blocks-1].data(), (plaintext+(16*(num_blocks-1))),
-    //           (length-(16*(num_blocks-1))));
-    //printf("Result: %s\n",new_plaintext[num_blocks-1].data());
-    //printf("done\n");
-    //encrypt_ecb(new_plaintext, num_blocks, keyblock, ciphertext);
     
     encrypt_ecb(plaintext_array, length, keyblock, ciphertext_array);
     
-    //unsigned char* result;// = "";
     
     unsigned char* result = static_cast<unsigned char*>(std::malloc(16*num_blocks));
     
     for(int block=0; block < num_blocks; block++)
     {
-        //printf("Cipher: %s\n", ciphertext[block].data());
         std::memcpy((result+(16*block)), ciphertext_array[block]->data(), 16);
     }
     
-    //std::memcpy(result, ciphertext, 16*num_blocks);
     return result;
 
-    /*
-    std::memcpy(datablock.data(), plaintext, 16);
-    std::memcpy(keyblock.data(), key, 16);
-
-    Block ciphertext = encrypt_block(datablock, keyblock);
-
-    unsigned char* result = static_cast<unsigned char*>(std::malloc(16));
-    std::memcpy(result, ciphertext.data(), 16);
-    return result;
-    */
     
     
 }
@@ -207,44 +145,17 @@ unsigned char* dumbaes_128_decrypt_ecb(const char* ciphertext,
         ciphertext_array[block].reset(new Block);
         std::memcpy(ciphertext_array[block]->data(), ciphertext+(16*block), 16);
     }
-    /*
-    ciphertext_array[num_blocks-1].reset(new Block);
-    std::memcpy(plaintext_array[num_blocks-1]->data(),
-               (plaintext+(16*(num_blocks-1))), (length-(16*(num_blocks-1))));
-    */           
     decrypt_ecb(ciphertext_array, length, keyblock, plaintext_array);           
                
     unsigned char* result = static_cast<unsigned char*>(std::malloc(16*num_blocks));
 
     for(int block=0; block < num_blocks; block++)
     {
-        //printf("Cipher: %s\n", ciphertext[block].data());
         std::memcpy((result+(16*block)), plaintext_array[block]->data(), 16);
     }
     
     
     *c_length = length;
-    //OLD
-    /*
-    Block new_ciphertext[num_blocks];
-    Block plaintext[num_blocks];
-    for(int block=0; block < num_blocks-1; block++)
-    {
-        std::memcpy(new_ciphertext[block].data(), (ciphertext+(16*block)), 16);
-    }
-    new_ciphertext[num_blocks-1].fill('0');
-    std::memcpy(new_ciphertext[num_blocks-1].data(), (ciphertext+(16*(num_blocks-1))),           (length-(16*(num_blocks-1))));
-    
-    decrypt_ecb(new_ciphertext, num_blocks, keyblock, plaintext);
-    
-    //unsigned char* result;// = "";
-    
-    
-    for(int block=0; block < num_blocks; block++)
-    {
-        std::memcpy((result+(16*block)), plaintext[block].data(), 16);
-    }
-    */
     return result;
 }
 //#endif

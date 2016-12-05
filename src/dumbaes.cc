@@ -270,7 +270,6 @@ void encrypt_ecb(const Block plaintext[], const int& num_blocks,
     
     for(int block=0; block < num_blocks; block++)
     {
-        //printf("Plaintext: %s\n", plaintext[block].data());
         std::memcpy(plain_block.data(), plaintext+block, 16);
         printf("Plaintext: %s\n", plain_block.data());
         cipher_block = encrypt_block(plain_block, key);
@@ -284,9 +283,7 @@ void encrypt_ecb(const std::unique_ptr<Block> plaintext[], size_t& length,
 {
     Block pad_block;
     int num_blocks = length /16 +1;
-    //printf("num_blocks: %d\n", num_blocks);
     int pad = length % 16;
-    //printf("pad: %d\n", pad);
     char pad_char = '0' + pad;
     for(int block=0; block < num_blocks-1; block++)
     {
@@ -302,40 +299,27 @@ void encrypt_ecb(const std::unique_ptr<Block> plaintext[], size_t& length,
     }
     else
     {
-        //printf("Block last: %s\n", plaintext[num_blocks-1]->data());
         std::memcpy(pad_block.data(), plaintext[num_blocks-1]->data(), pad);
     }
     
-    //printf("Block last: %s\n", pad_block.data());
     ciphertext[num_blocks-1].reset(new Block);
     *ciphertext[num_blocks-1] = encrypt_block(pad_block, key);
-    //length = num_blocks * 16;
     
 }
 
 void decrypt_ecb(const std::unique_ptr<Block> ciphertext[], size_t& length,
                  const Key& key, std::unique_ptr<Block> plaintext[])
 {
-    Block pad_block, cipher_block;
     int num_blocks = length /16 ;
-    int pad = 0;//length % 16;
-    char pad_char;// = ''; + pad;
-    //printf("num_blocks: %d\n", num_blocks);
+    int pad = 0;
+    char pad_char;
     for(int block=0; block < num_blocks; block++)
     {
         plaintext[block].reset(new Block);
         *plaintext[block] = decrypt_block(*ciphertext[block], key);
-        //printf("Block%d: %s\n",block,plaintext[block]->data());
         
     }
-    //pad_block.fill(pad_char);
-    //std::memcpy(pad_block.data(), ciphertext[num_blocks-1]->data(), 16);
-    //plaintext[num_blocks-1].reset(new Block);
-    //*ciphertext[num_blocks-1] = encrypt_block(pad_block, key);
-    //length = num_blocks * 16;
     pad_char = (*plaintext[num_blocks-1])[15];
-    //printf("pad_char: %c\n",pad_char);
-    //printf("length: %d\n",length);
     if('0' == pad_char)
     {
         length -= 16;
@@ -345,24 +329,6 @@ void decrypt_ecb(const std::unique_ptr<Block> ciphertext[], size_t& length,
         pad = pad_char-'0';
         length -= (16-pad);
     }
-    //printf("length: %d\n",length);
-    /*
-    pad_block = decrypt_block(*ciphertext[num_blocks-1], key);
-    printf("Block%d: %s\n",num_blocks-1,pad_block.data());
-    pad_char = pad_block[15];
-    printf("pad_char: %c",pad_char);
-    if('0' == pad_char)
-    {
-        length -= 16;
-    }
-    else
-    {
-        plaintext[num_blocks-1].reset(new Block);
-        pad = pad_char-'0';
-        std::memcpy(plaintext[num_blocks-1]->data(), pad_block.data(),  pad);
-        length -= pad;
-    }
-    */
     
     
 }

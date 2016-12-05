@@ -206,9 +206,8 @@ decrypt_file (void)
       
     case ecb:
       plaintext = dumbaes_128_decrypt_ecb ((char *)ciphertext,
-                                            (size_t ) &length,
+                                             &length,
                                             (unsigned char *)key);
-      printf("c_length: %d\n", length);                                      
       break;
     default:
       //TODO: Add error
@@ -267,7 +266,6 @@ encrypt_file (void)
   //ciphertext = dumbaes_128_encrypt_block ((unsigned char *)plaintext,
   //                                        (unsigned char *)key);
   length = (length/16 +1) * 16;
-  //printf("Size: %d\n",length);
   ret = write_to_output_file (ciphertext);
 
 out:

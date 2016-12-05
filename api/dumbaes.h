@@ -34,6 +34,7 @@
 extern "C" {
 #endif
 
+#include <stdlib.h>
 /**
  * dumbaes_128_encrypt_block:
  * @plaintext: the plaintext to encrypt
@@ -62,7 +63,7 @@ unsigned char *dumbaes_128_encrypt_block (const unsigned char *plaintext,
 unsigned char *dumbaes_128_decrypt_block (const unsigned char *ciphertext,
                                           const unsigned char *key);
 
-#if 0
+//#if 0
 // TODO: Implement these functions
 
 /**
@@ -82,8 +83,8 @@ unsigned char *dumbaes_128_decrypt_block (const unsigned char *ciphertext,
  */
 unsigned char *dumbaes_128_encrypt_cbc (const unsigned char *plaintext,
                                         size_t               length,
-                                        const unsigned char *key,
-                                        const unsigned char *iv);
+                                        const unsigned char *key);//,
+                                        //const unsigned char *iv);
 
 /**
  * dumbaes_128_decrypt_cbc:
@@ -99,10 +100,10 @@ unsigned char *dumbaes_128_encrypt_cbc (const unsigned char *plaintext,
  *
  * Returns: plaintext of length @length. Free with free().
  */
-unsigned char *dumbaes_128_encrypt_cbc (const char          *ciphertext,
+unsigned char *dumbaes_128_decrypt_cbc (const char          *ciphertext,
                                         size_t               length,
-                                        const unsigned char *key,
-                                        const unsigned char *iv);
+                                        const unsigned char *key);//,
+                                        //const unsigned char *iv);
 
 /**
  * dumbaes_128_encrypt_ecb:
@@ -137,11 +138,11 @@ unsigned char *dumbaes_128_encrypt_ecb (const unsigned char *plaintext,
  *
  * Returns: plaintext of length @length. Free with free().
  */
-unsigned char *dumbaes_128_encrypt_ecb (const char          *ciphertext,
-                                        size_t               length,
+unsigned char *dumbaes_128_decrypt_ecb (const char          *ciphertext,
+                                        size_t              *c_length,
                                         const unsigned char *key);
 
-#endif
+//#endif
 
 #ifdef __cplusplus
 } // extern "C"

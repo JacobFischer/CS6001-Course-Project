@@ -31,6 +31,7 @@
 
 #include "word.h"
 #include <array>
+#include <memory>
 #include <cstdint>
 #include <functional>
 
@@ -60,6 +61,15 @@ Block decrypt_block(const Block& block, const Key& key);
 // encrypt/decrypt the data using the above functions and cipher-block chaining.
 // Then call these functions from api/.
 
+void encrypt_ecb(const Block plaintext[], const int& num_blocks,
+                 const Key& key, Block ciphertext[]);
+void encrypt_ecb(const std::unique_ptr<Block> plaintext[], size_t& length,
+                 const Key& key, std::unique_ptr<Block> ciphertext[]);                
+
+void decrypt_ecb(const Block ciphertext[], const int& num_blocks,
+                 const Key& key, Block plaintext[]);                 
+void decrypt_ecb(const std::unique_ptr<Block> ciphertext[], size_t& length,
+                 const Key& key, std::unique_ptr<Block> plaintext[]);                 
 // Exposed only for unit tests.
 namespace internal {
 

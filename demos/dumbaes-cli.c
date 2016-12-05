@@ -33,11 +33,15 @@
 #include <glib.h>
 #include <locale.h>
 #include <stdlib.h>
+#include <string.h>
 
 static char *ciphertext_filename = NULL;
 static char *plaintext_filename = NULL;
 static char *key_filename = NULL;
 static char *output_filename = NULL;
+static char *aes_mode_input = NULL;
+static enum AES_Modes{test,ecb,cbc} mode;
+static gsize length;
 
 static char *
 read_ciphertext (void)
@@ -65,7 +69,7 @@ read_ciphertext (void)
       g_free (ciphertext);
       return NULL;
     }
-
+  length = ciphertext_length;
   return ciphertext;
 }
 
@@ -85,6 +89,8 @@ read_plaintext (void)
       g_error_free (error);
       return NULL;
     }
+  
+  
 
   // TODO: Remove length restriction when switching to CBC.
   if (plaintext_length < 16)
@@ -95,7 +101,7 @@ read_plaintext (void)
       g_free (plaintext);
       return NULL;
     }
-
+  length = plaintext_length;
   return plaintext;
 }
 
@@ -150,7 +156,7 @@ write_to_output_file (const unsigned char *output)
   // Beware that |output| can contain embedded NULLs.
   if (!g_output_stream_write_all (g_io_stream_get_output_stream (G_IO_STREAM (iostream)),
                                   output,
-                                  16,
+                                  length,//16,
                                   &bytes_written,
                                   NULL,
                                   &error))
@@ -188,8 +194,28 @@ decrypt_file (void)
     goto out;
 
   // TODO: Use CBC here instead.
-  plaintext = dumbaes_128_decrypt_block ((unsigned char *)ciphertext,
-                                         (unsigned char *)key);
+  //plaintext = dumbaes_128_decrypt_block ((unsigned char *)ciphertext,
+  //                                       (unsigned char *)key);
+  switch (mode)
+  {
+    case cbc:
+      plaintext = dumbaes_128_decrypt_cbc ((char *)ciphertext,
+                                            (size_t) length, 
+                                            (unsigned char *)key);
+      break;
+      
+    case ecb:
+      plaintext = dumbaes_128_decrypt_ecb ((char *)ciphertext,
+                                            (size_t ) &length,
+                                            (unsigned char *)key);
+      printf("c_length: %d\n", length);                                      
+      break;
+    default:
+      //TODO: Add error
+      break;      
+  }
+  
+  
   ret = write_to_output_file (plaintext);
 
 out:
@@ -218,8 +244,30 @@ encrypt_file (void)
     goto out;
 
   // TODO: Use CBC here instead.
-  ciphertext = dumbaes_128_encrypt_block ((unsigned char *)plaintext,
+  switch (mode)
+  {
+    case cbc:
+      ciphertext = dumbaes_128_encrypt_cbc ((unsigned char *)plaintext,
+                                            (size_t) length, 
+                                            (unsigned char *)key);
+      break;
+      
+    case ecb:
+      ciphertext = dumbaes_128_encrypt_ecb ((unsigned char *)plaintext,
+                                            (size_t) length,
+                                            (unsigned char *)key);  
+      break;
+    default:
+      //TODO: Add error
+      ciphertext = dumbaes_128_encrypt_block ((unsigned char *)plaintext,
                                           (unsigned char *)key);
+      
+      break;   
+  }
+  //ciphertext = dumbaes_128_encrypt_block ((unsigned char *)plaintext,
+  //                                        (unsigned char *)key);
+  length = (length/16 +1) * 16;
+  //printf("Size: %d\n",length);
   ret = write_to_output_file (ciphertext);
 
 out:
@@ -241,6 +289,8 @@ static const GOptionEntry option_entries[] =
     "File containing private key", "FILE" },
   { "output", 'o', 0, G_OPTION_ARG_FILENAME, &output_filename,
     "File to use for output", "FILE" },
+  { "mode", 'm', 0, G_OPTION_ARG_STRING, &aes_mode_input,
+    "AES Mode (Default ECB)", "M" },
   { NULL }
 };
 
@@ -286,6 +336,19 @@ main (int argc, char **argv)
       g_fprintf (stderr, "You must specify only one of -d/--decrypt or -e/--encrypt\n");
       goto out;
     }
+    
+  if (!strcmp("cbc", aes_mode_input))
+    {
+      mode = cbc;
+    }
+  else if(!strcmp("test", aes_mode_input))
+    {
+      mode=test;
+    }  
+  else
+    {
+      mode = ecb;
+    }      
 
   if (ciphertext_filename != NULL)
     ret = decrypt_file ();

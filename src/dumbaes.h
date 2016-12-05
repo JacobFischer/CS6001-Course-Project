@@ -61,13 +61,33 @@ Block decrypt_block(const Block& block, const Key& key);
 // encrypt/decrypt the data using the above functions and cipher-block chaining.
 // Then call these functions from api/.
 
+/**
+ *  Earlier attmept ignore
+ */
 void encrypt_ecb(const Block plaintext[], const int& num_blocks,
                  const Key& key, Block ciphertext[]);
+                 
+/**
+ *  Takes  arrays of Block pointers containg the plaintext and
+ *    ciphertext aling with a key and length of file read in. 
+ *  Will encrypt each plaintext block individually as per ecb mode operations
+ *    and store it in ciphertext blocks
+ */
 void encrypt_ecb(const std::unique_ptr<Block> plaintext[], size_t& length,
                  const Key& key, std::unique_ptr<Block> ciphertext[]);                
-
+/**
+ *  Old Ignore
+ */ 
 void decrypt_ecb(const Block ciphertext[], const int& num_blocks,
-                 const Key& key, Block plaintext[]);                 
+                 const Key& key, Block plaintext[]);  
+
+/**
+ *  Takes  arrays of Block pointers containg the plaintext and
+ *    ciphertext aling with a key and length of file read in. 
+ *  Will decrypt each ciphertext block individually as per ecb mode operations
+ *    and store it in ciphertext blocks.
+ *  The size_t at 'length' will be modified to account for padding removal;
+ */                
 void decrypt_ecb(const std::unique_ptr<Block> ciphertext[], size_t& length,
                  const Key& key, std::unique_ptr<Block> plaintext[]);                 
 // Exposed only for unit tests.

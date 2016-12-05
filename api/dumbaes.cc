@@ -41,7 +41,6 @@ using namespace dumbaes;
 unsigned char* dumbaes_128_encrypt_block(const unsigned char* plaintext,
                                          const unsigned char* key)
 {
-    printf("%s\n",plaintext);
     Block datablock;
     Key keyblock;
 

@@ -271,7 +271,6 @@ void encrypt_ecb(const Block plaintext[], const int& num_blocks,
     for(int block=0; block < num_blocks; block++)
     {
         std::memcpy(plain_block.data(), plaintext+block, 16);
-        printf("Plaintext: %s\n", plain_block.data());
         cipher_block = encrypt_block(plain_block, key);
         std::memcpy(ciphertext[0].data(), cipher_block.data(), 16);
     }

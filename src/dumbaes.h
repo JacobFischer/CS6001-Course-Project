@@ -32,7 +32,11 @@
 #include "word.h"
 #include <array>
 #include <memory>
+#include <vector>
 #include <cstdint>
+#include <cstdlib>
+#include <ctime>
+#include <algorithm>
 #include <functional>
 
 namespace dumbaes {
@@ -42,6 +46,7 @@ using Block = std::array<uint8_t, 16>;
 
 // This would need to be changed to 24 or 32 for AES-192 or AES-256.
 using Key = std::array<uint8_t, 16>;
+
 
 /**
  * It encrypts one block of data with the specified key. This probably shouldn't
@@ -61,12 +66,7 @@ Block decrypt_block(const Block& block, const Key& key);
 // encrypt/decrypt the data using the above functions and cipher-block chaining.
 // Then call these functions from api/.
 
-/**
- *  Earlier attmept ignore
- */
-void encrypt_ecb(const Block plaintext[], const int& num_blocks,
-                 const Key& key, Block ciphertext[]);
-                 
+                
 /**
  *  Takes  arrays of Block pointers containg the plaintext and
  *    ciphertext aling with a key and length of file read in. 
@@ -75,11 +75,6 @@ void encrypt_ecb(const Block plaintext[], const int& num_blocks,
  */
 void encrypt_ecb(const std::unique_ptr<Block> plaintext[], size_t& length,
                  const Key& key, std::unique_ptr<Block> ciphertext[]);                
-/**
- *  Old Ignore
- */ 
-void decrypt_ecb(const Block ciphertext[], const int& num_blocks,
-                 const Key& key, Block plaintext[]);  
 
 /**
  *  Takes  arrays of Block pointers containg the plaintext and
@@ -89,7 +84,16 @@ void decrypt_ecb(const Block ciphertext[], const int& num_blocks,
  *  The size_t at 'length' will be modified to account for padding removal;
  */                
 void decrypt_ecb(const std::unique_ptr<Block> ciphertext[], size_t& length,
-                 const Key& key, std::unique_ptr<Block> plaintext[]);                 
+                 const Key& key, std::unique_ptr<Block> plaintext[]); 
+/*
+void encrypt_cbc(const std::unique_ptr<Block> plaintext[], size_t& length,
+                 const Key& key, std::unique_ptr<Block> ciphertext[]);
+*/
+std::vector<Block> encrypt_cbc(const std::vector<Block>& plaintext, size_t& length,
+                        const Key& key);                 
+std::vector<Block> decrypt_cbc(const std::vector<Block>& ciphertext, size_t& length,
+                        const Key& key);
+Block generate_iv();                 
 // Exposed only for unit tests.
 namespace internal {
 

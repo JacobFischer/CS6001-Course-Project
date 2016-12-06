@@ -35,13 +35,23 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef enum 
+  {
+    TEST,
+    ECB,
+    CBC
+  } AESMode;
+
 static char *ciphertext_filename = NULL;
 static char *plaintext_filename = NULL;
 static char *key_filename = NULL;
 static char *output_filename = NULL;
 static char *aes_mode_input = NULL;
-static enum AES_Modes{test,ecb,cbc} mode;
 static gsize length;
+static AESMode aes_mode = CBC;
+
+
+
 
 static char *
 read_ciphertext (void)
@@ -154,9 +164,10 @@ write_to_output_file (const unsigned char *output)
 
   // TODO: When switching to CBC, the third argument must be set to the right length.
   // Beware that |output| can contain embedded NULLs.
+  
   if (!g_output_stream_write_all (g_io_stream_get_output_stream (G_IO_STREAM (iostream)),
                                   output,
-                                  length,//16,
+                                  length,
                                   &bytes_written,
                                   NULL,
                                   &error))
@@ -182,6 +193,7 @@ decrypt_file (void)
 {
   char *ciphertext = NULL;
   char *key = NULL;
+  char *junk_iv =NULL;
   unsigned char *plaintext = NULL;
   int ret = EXIT_FAILURE;
 
@@ -194,20 +206,18 @@ decrypt_file (void)
     goto out;
 
   // TODO: Use CBC here instead.
-  //plaintext = dumbaes_128_decrypt_block ((unsigned char *)ciphertext,
-  //                                       (unsigned char *)key);
-  switch (mode)
+  switch (aes_mode)
   {
-    case cbc:
-      plaintext = dumbaes_128_decrypt_cbc ((char *)ciphertext,
-                                            (size_t) length, 
-                                            (unsigned char *)key);
-      break;
-      
-    case ecb:
-      plaintext = dumbaes_128_decrypt_ecb ((char *)ciphertext,
-                                             &length,
-                                            (unsigned char *)key);
+    case CBC:
+      plaintext = dumbaes_128_decrypt_cbc ((unsigned char *)ciphertext,
+                                           &length, 
+                                           (unsigned char *)key,
+                                           (unsigned char *)junk_iv);
+      break;      
+    case ECB:
+      plaintext = dumbaes_128_decrypt_ecb ((unsigned char *)ciphertext,
+                                           &length,
+                                           (unsigned char *)key);
       break;
     default:
       //TODO: Add error
@@ -231,7 +241,8 @@ encrypt_file (void)
 {
   char *plaintext = NULL;
   char *key = NULL;
-  unsigned char *ciphertext = NULL;
+  char *junk_iv =NULL;
+  char *ciphertext = NULL;
   int ret = EXIT_FAILURE;
 
   plaintext = read_plaintext ();
@@ -243,29 +254,25 @@ encrypt_file (void)
     goto out;
 
   // TODO: Use CBC here instead.
-  switch (mode)
+  
+  switch (aes_mode)
   {
-    case cbc:
+    case CBC:
       ciphertext = dumbaes_128_encrypt_cbc ((unsigned char *)plaintext,
-                                            (size_t) length, 
-                                            (unsigned char *)key);
+                                            &length, 
+                                            (unsigned char *)key,
+                                            (unsigned char *)junk_iv);
       break;
-      
-    case ecb:
+    case ECB:
       ciphertext = dumbaes_128_encrypt_ecb ((unsigned char *)plaintext,
-                                            (size_t) length,
+                                            &length,
                                             (unsigned char *)key);  
       break;
     default:
       //TODO: Add error
-      ciphertext = dumbaes_128_encrypt_block ((unsigned char *)plaintext,
-                                          (unsigned char *)key);
-      
       break;   
   }
-  //ciphertext = dumbaes_128_encrypt_block ((unsigned char *)plaintext,
-  //                                        (unsigned char *)key);
-  length = (length/16 +1) * 16;
+  //length = (length/16 +1) * 16;
   ret = write_to_output_file (ciphertext);
 
 out:
@@ -335,17 +342,17 @@ main (int argc, char **argv)
       goto out;
     }
     
-  if (!strcmp("cbc", aes_mode_input))
+  if (!strcmp ("cbc", aes_mode_input))
     {
-      mode = cbc;
+      aes_mode = CBC;
     }
-  else if(!strcmp("test", aes_mode_input))
+  else if (!strcmp ("test", aes_mode_input))
     {
-      mode=test;
+      aes_mode = TEST;
     }  
   else
     {
-      mode = ecb;
+      aes_mode = ECB;
     }      
 
   if (ciphertext_filename != NULL)

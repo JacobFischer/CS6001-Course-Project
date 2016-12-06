@@ -30,11 +30,13 @@
 #ifndef DUMBAES_H
 #define DUMBAES_H
 
+#include <stdlib.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stdlib.h>
+
 /**
  * dumbaes_128_encrypt_block:
  * @plaintext: the plaintext to encrypt
@@ -69,7 +71,7 @@ unsigned char *dumbaes_128_decrypt_block (const unsigned char *ciphertext,
 /**
  * dumbaes_128_encrypt_cbc:
  * @plaintext: the plaintext to encrypt
- * @length: length of the plaintext to encrypt, in bytes
+ * @length: pointer length of the plaintext to encrypt, in bytes
  * @key: the private key to use for the encryption
  * @iv: the initialization vector to use for the encryption
  *
@@ -82,14 +84,14 @@ unsigned char *dumbaes_128_decrypt_block (const unsigned char *ciphertext,
  * Returns: ciphertext of length @length. Free with free().
  */
 unsigned char *dumbaes_128_encrypt_cbc (const unsigned char *plaintext,
-                                        size_t               length,
-                                        const unsigned char *key);//,
-                                        //const unsigned char *iv);
+                                        size_t              *length,
+                                        const unsigned char *key,
+                                        const unsigned char *iv);
 
 /**
  * dumbaes_128_decrypt_cbc:
  * @ciphertext: the ciphertext to decrypt
- * @length: length of the ciphertext to decrypt, in bytes
+ * @length: pointer length of the ciphertext to decrypt, in bytes
  * @key: the private key to use for the decryption
  * @iv: the initialization vector to use for the decryption
  *
@@ -100,15 +102,15 @@ unsigned char *dumbaes_128_encrypt_cbc (const unsigned char *plaintext,
  *
  * Returns: plaintext of length @length. Free with free().
  */
-unsigned char *dumbaes_128_decrypt_cbc (const char          *ciphertext,
-                                        size_t               length,
-                                        const unsigned char *key);//,
-                                        //const unsigned char *iv);
+unsigned char *dumbaes_128_decrypt_cbc (const unsigned char *ciphertext,
+                                        size_t              *length,
+                                        const unsigned char *key,
+                                        const unsigned char *iv);
 
 /**
  * dumbaes_128_encrypt_ecb:
  * @plaintext: the plaintext to encrypt
- * @length: length of the plaintext to encrypt, in bytes
+ * @length: pointer to length of the plaintext to encrypt, in bytes
  * @key: the private key to use for the encryption
  *
  * Encrypts a @plaintext of length @length using the private key @key.
@@ -122,13 +124,13 @@ unsigned char *dumbaes_128_decrypt_cbc (const char          *ciphertext,
  * Returns: ciphertext of length @length. Free with free().
  */
 unsigned char *dumbaes_128_encrypt_ecb (const unsigned char *plaintext,
-                                        size_t               length,
+                                        size_t              *length,
                                         const unsigned char *key);
 
 /**
  * dumbaes_128_decrypt_ecb:
  * @ciphertext: the ciphertext to decrypt
- * @length: length of the ciphertext to decrypt, in bytes
+ * @length: pointer to length of the ciphertext to decrypt, in bytes
  * @key: the private key to use for the decryption
  *
  * Decrypts a @ciphertext encrypted by dumbaes_128_encrypt_ecb() of
@@ -138,8 +140,8 @@ unsigned char *dumbaes_128_encrypt_ecb (const unsigned char *plaintext,
  *
  * Returns: plaintext of length @length. Free with free().
  */
-unsigned char *dumbaes_128_decrypt_ecb (const char          *ciphertext,
-                                        size_t              *c_length,
+unsigned char *dumbaes_128_decrypt_ecb (const unsigned char *ciphertext,
+                                        size_t              *length,
                                         const unsigned char *key);
 
 //#endif

@@ -41,6 +41,7 @@ static GFile *input_file = NULL;
 static GFile *key_file = NULL;
 static unsigned char *result = NULL;
 static gboolean displaying_ciphertext = FALSE;
+static gsize length;
 
 // TODO: Figure out how to format an arbitary-length of data when implementing CBC.
 #define BLOCK_FORMAT "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x"
@@ -55,7 +56,7 @@ show_error (const char *error)
 }
 
 static char *
-read_file (GFile *file)
+read_file (GFile *file, int is_key)
 {
   GError *error = NULL;
   char *contents;
@@ -74,6 +75,11 @@ read_file (GFile *file)
       g_error_free (error);
       return NULL;
     }
+    
+  if (!is_key)
+    {
+      length = contents_length;
+    }      
 
   // TODO: Remove length restriction when switching to CBC.
   if (contents_length < 16)
@@ -113,6 +119,7 @@ encrypt_button_activate_cb (void)
   char *input = NULL;
   char *key = NULL;
   char *display_string = NULL;
+  char *junk_iv=NULL;
 
   if (input_file == NULL || key_file == NULL)
     {
@@ -120,22 +127,20 @@ encrypt_button_activate_cb (void)
       return;
     }
 
-  input = read_file (input_file);
+  input = read_file (input_file, 0);
   if (input == NULL)
     goto out;
 
-  key = read_file (key_file);
+  key = read_file (key_file, 1);
   if (key == NULL)
     goto out;
 
   // TODO: Use CBC here instead.
   g_clear_pointer (&result, free);
-  result = dumbaes_128_encrypt_block ((unsigned char *)input, (unsigned char *)key);
-  display_string = g_strdup_printf ("Encrypted text: " BLOCK_FORMAT,
-                                    result[0], result[1], result[2], result[3],
-                                    result[4], result[5], result[6], result[7],
-                                    result[8], result[9], result[10], result[11],
-                                    result[12], result[13], result[14], result[15]);
+  result = dumbaes_128_encrypt_cbc ((unsigned char *)input, &length,
+                                    (unsigned char *)key, (unsigned char *)junk_iv);
+  
+  display_string = g_strdup_printf ("Encryption: DONE :)");
   gtk_label_set_text (GTK_LABEL (result_label), display_string);
   gtk_widget_show (result_label);
 
@@ -154,6 +159,7 @@ decrypt_button_activate_cb (void)
   char *input = NULL;
   char *key = NULL;
   char *display_string = NULL;
+  char *junk_iv = NULL;
 
   if (input_file == NULL || key_file == NULL)
     {
@@ -161,22 +167,19 @@ decrypt_button_activate_cb (void)
       return;
     }
 
-  input = read_file (input_file);
+  input = read_file (input_file, 0);
   if (input == NULL)
     goto out;
 
-  key = read_file (key_file);
+  key = read_file (key_file, 1);
   if (key == NULL)
     goto out;
 
   // TODO: Use CBC here instead.
   g_clear_pointer (&result, free);
-  result = dumbaes_128_decrypt_block ((unsigned char *)input, (unsigned char *)key);
-  display_string = g_strdup_printf ("Encrypted text: " BLOCK_FORMAT,
-                                    result[0], result[1], result[2], result[3],
-                                    result[4], result[5], result[6], result[7],
-                                    result[8], result[9], result[10], result[11],
-                                    result[12], result[13], result[14], result[15]);
+  result = dumbaes_128_decrypt_cbc ((unsigned char *)input, &length,
+                                    (unsigned char *)key, (unsigned char *)junk_iv);
+  display_string = g_strdup_printf ("Decryption: DONE :)");
   gtk_label_set_text (GTK_LABEL (result_label), display_string);
   gtk_widget_show (result_label);
 
@@ -209,11 +212,11 @@ write_to_output_file (const char *output_filename)
       goto out;
     }
 
-  // TODO: When switching to CBC, the third argument must be set to the right length.
+    // TODO: When switching to CBC, the third argument must be set to the right length.
   // Beware that |result| can contain embedded NULLs.
   if (!g_output_stream_write_all (g_io_stream_get_output_stream (G_IO_STREAM (iostream)),
                                   result,
-                                  16,
+                                  length,
                                   &bytes_written,
                                   NULL,
                                   &error))

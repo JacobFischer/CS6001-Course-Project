@@ -56,7 +56,7 @@ show_error (const char *error)
 }
 
 static char *
-read_file (GFile *file, int is_key)
+read_file (GFile *file, gboolean is_key)
 {
   GError *error = NULL;
   char *contents;
@@ -127,11 +127,11 @@ encrypt_button_activate_cb (void)
       return;
     }
 
-  input = read_file (input_file, 0);
+  input = read_file (input_file, FALSE);
   if (input == NULL)
     goto out;
 
-  key = read_file (key_file, 1);
+  key = read_file (key_file, TRUE);
   if (key == NULL)
     goto out;
 
@@ -167,11 +167,11 @@ decrypt_button_activate_cb (void)
       return;
     }
 
-  input = read_file (input_file, 0);
+  input = read_file (input_file, FALSE);
   if (input == NULL)
     goto out;
 
-  key = read_file (key_file, 1);
+  key = read_file (key_file, TRUE);
   if (key == NULL)
     goto out;
 

@@ -262,48 +262,46 @@ Block decrypt_block(const Block& block, const Key& key)
     return state_to_block(std::move(state));
 }
 
-
-
-void encrypt_ecb(const std::unique_ptr<Block> plaintext[], size_t& length,
-                 const Key& key, std::unique_ptr<Block> ciphertext[])
+std::vector<Block> encrypt_ecb(const std::vector<Block>& plaintext, size_t& length,
+                               const Key& key)
 {
     Block pad_block;
-    int num_blocks = length /16 +1;
+    
+    size_t num_blocks = (length / 16) + 1;
     size_t pad = length % 16;
     char pad_char = '0' + pad;
-    for (int block=0; block < num_blocks-1; block++)
+    std::vector<Block> ciphertext;
+    for (size_t block=0; block<num_blocks-1; block++)
     {
-        ciphertext[block].reset(new Block);
-        *ciphertext[block] = encrypt_block(*plaintext[block], key);
-        
+        ciphertext.push_back(encrypt_block(plaintext[block], key));
     }
     
     pad_block.fill(pad_char);
-    if (0 == pad)
+    if (pad != 0)
     {
-        //will fix when rewritten
+        std::memcpy(pad_block.data(), plaintext[num_blocks-1].data(), pad);
     }
-    else
-    {
-        std::memcpy(pad_block.data(), plaintext[num_blocks-1]->data(), pad);
-    }
-    ciphertext[num_blocks-1].reset(new Block);
-    *ciphertext[num_blocks-1] = encrypt_block(pad_block, key);
     
-}
+    ciphertext.push_back(encrypt_block(pad_block, key));
+    
+    length = (num_blocks) * 16;
+    
+    return ciphertext;
+} 
 
-void decrypt_ecb(const std::unique_ptr<Block> ciphertext[], size_t& length,
-                 const Key& key, std::unique_ptr<Block> plaintext[])
+std::vector<Block> decrypt_ecb(const std::vector<Block>& ciphertext, size_t& length,
+                               const Key& key)
 {
-    size_t num_blocks = length /16 ;
+    size_t num_blocks = length / 16;
     size_t pad = 0;
-    char pad_char;
-    for (size_t block=0; block < num_blocks; block++)
+    std::vector<Block> plaintext;
+
+    for (size_t block = 0; block < num_blocks; block++)
     {
-        plaintext[block].reset(new Block);
-        *plaintext[block] = decrypt_block(*ciphertext[block], key);
+        plaintext.push_back(decrypt_block(ciphertext[block], key));
     }
-    pad_char = (*plaintext[num_blocks-1])[15];
+    
+    char pad_char = plaintext[num_blocks-1][15];
     if (pad_char == '0')
     {
         length -= 16;
@@ -313,6 +311,8 @@ void decrypt_ecb(const std::unique_ptr<Block> ciphertext[], size_t& length,
         pad = pad_char-'0';
         length -= (16-pad);
     }
+    
+    return plaintext;
 }
 
 std::vector<Block> encrypt_cbc(const std::vector<Block>& plaintext, size_t& length,
@@ -371,7 +371,7 @@ std::vector<Block> decrypt_cbc(const std::vector<Block>& ciphertext, size_t& len
     xor_input = decrypt_block(ciphertext[0],key);
     for (int i=0; i<16; i++)
     {
-        plaintext[0][i] = char(xor_input[i]) ^ char(iv[i]);
+        plaintext[0][i] = static_cast<char>(xor_input[i]) ^ static_cast<char>(iv[i]);
     }
     
     for (size_t block=1; block<num_blocks; block++)
@@ -379,12 +379,12 @@ std::vector<Block> decrypt_cbc(const std::vector<Block>& ciphertext, size_t& len
         xor_input = decrypt_block(ciphertext[block],key);
         for (int i=0; i<16; i++)
         {
-            plaintext[block][i] = char(xor_input[i]) ^ char(ciphertext[block-1][i]);
+            plaintext[block][i] = static_cast<char>(xor_input[i]) 
+                                  ^ static_cast<char>(ciphertext[block-1][i]);
         }           
     }
     
     char pad_char = plaintext[num_blocks-1][15];
-    int test_pad = pad_char-'0';
     if (pad_char == '0')
     {
         length -= 16;

@@ -47,7 +47,7 @@ static char *plaintext_filename = NULL;
 static char *key_filename = NULL;
 static char *output_filename = NULL;
 static char *aes_mode_input = NULL;
-static gsize length;
+static size_t length;
 static AESMode aes_mode = CBC;
 
 
@@ -193,7 +193,7 @@ decrypt_file (void)
 {
   char *ciphertext = NULL;
   char *key = NULL;
-  char *junk_iv =NULL;
+  char *junk_iv = NULL;
   unsigned char *plaintext = NULL;
   int ret = EXIT_FAILURE;
 
@@ -224,7 +224,6 @@ decrypt_file (void)
       break;      
   }
   
-  
   ret = write_to_output_file (plaintext);
 
 out:
@@ -241,8 +240,8 @@ encrypt_file (void)
 {
   char *plaintext = NULL;
   char *key = NULL;
-  char *junk_iv =NULL;
-  char *ciphertext = NULL;
+  char *junk_iv = NULL;
+  unsigned char *ciphertext = NULL;
   int ret = EXIT_FAILURE;
 
   plaintext = read_plaintext ();
@@ -268,11 +267,14 @@ encrypt_file (void)
                                             &length,
                                             (unsigned char *)key);  
       break;
+    case TEST:
+      ciphertext = dumbaes_128_encrypt_block ((unsigned char *)plaintext,
+                                              (unsigned char *)key);
     default:
       //TODO: Add error
       break;   
   }
-  //length = (length/16 +1) * 16;
+
   ret = write_to_output_file (ciphertext);
 
 out:

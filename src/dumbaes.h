@@ -31,13 +31,14 @@
 
 #include "word.h"
 #include <array>
-#include <memory>
-#include <vector>
+#include <algorithm>
 #include <cstdint>
 #include <cstdlib>
 #include <ctime>
-#include <algorithm>
 #include <functional>
+#include <memory>
+#include <vector>
+
 
 namespace dumbaes {
 
@@ -66,16 +67,15 @@ Block decrypt_block(const Block& block, const Key& key);
 // encrypt/decrypt the data using the above functions and cipher-block chaining.
 // Then call these functions from api/.
 
-                
 /**
  *  Takes  arrays of Block pointers containg the plaintext and
  *    ciphertext aling with a key and length of file read in. 
  *  Will encrypt each plaintext block individually as per ecb mode operations
  *    and store it in ciphertext blocks
  */
-void encrypt_ecb(const std::unique_ptr<Block> plaintext[], size_t& length,
-                 const Key& key, std::unique_ptr<Block> ciphertext[]);                
-
+std::vector<Block> encrypt_ecb(const std::vector<Block>& plaintext, size_t& length,
+                        const Key& key); 
+                        
 /**
  *  Takes  arrays of Block pointers containg the plaintext and
  *    ciphertext aling with a key and length of file read in. 
@@ -83,14 +83,12 @@ void encrypt_ecb(const std::unique_ptr<Block> plaintext[], size_t& length,
  *    and store it in ciphertext blocks.
  *  The size_t at 'length' will be modified to account for padding removal;
  */                
-void decrypt_ecb(const std::unique_ptr<Block> ciphertext[], size_t& length,
-                 const Key& key, std::unique_ptr<Block> plaintext[]); 
-/*
-void encrypt_cbc(const std::unique_ptr<Block> plaintext[], size_t& length,
-                 const Key& key, std::unique_ptr<Block> ciphertext[]);
-*/
+std::vector<Block> decrypt_ecb(const std::vector<Block>& ciphertext, size_t& length,
+                        const Key& key);
+                        
 std::vector<Block> encrypt_cbc(const std::vector<Block>& plaintext, size_t& length,
-                        const Key& key);                 
+                        const Key& key);
+                        
 std::vector<Block> decrypt_cbc(const std::vector<Block>& ciphertext, size_t& length,
                         const Key& key);
 Block generate_iv();                 

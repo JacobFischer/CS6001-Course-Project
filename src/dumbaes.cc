@@ -316,26 +316,27 @@ std::vector<Block> decrypt_ecb(const std::vector<Block>& ciphertext, size_t& len
 }
 
 std::vector<Block> encrypt_cbc(const std::vector<Block>& plaintext, size_t& length,
-                               const Key& key)
+                               const Key& key, const Block& iv)
 {
-    Block pad_block, iv, xor_result;
+    Block pad_block, xor_result;
+    std::vector<Block> ciphertext;
     
-    iv = generate_iv();
     size_t num_blocks = length /16 +1;
     size_t pad = length % 16;
     char pad_char = '0' + pad;
-    std::vector<Block> ciphertext;
+    
     for (int i=0; i<16; i++)
     {
-        xor_result[i] = char(plaintext[0][i]) ^ char(iv[i]);
+        xor_result[i] = static_cast<char>(plaintext[0][i]) 
+                      ^ static_cast<char>(iv[i]);
     }
     ciphertext.push_back(encrypt_block(xor_result, key));
-    
     for (size_t block=1; block<num_blocks-1; block++)
     {
         for (int i=0; i<16; i++)
         {
-            xor_result[i] = char(plaintext[block][i]) ^ char(ciphertext[block-1][i]);
+            xor_result[i] = static_cast<char>(plaintext[block][i]) 
+                          ^ static_cast<char>(ciphertext[block-1][i]);
         }
         ciphertext.push_back(encrypt_block(xor_result, key));
     }
@@ -343,35 +344,34 @@ std::vector<Block> encrypt_cbc(const std::vector<Block>& plaintext, size_t& leng
     pad_block.fill(pad_char);
     if (pad != 0)
     {
-        std::memcpy(pad_block.data(), &plaintext[num_blocks-1], pad);
+        std::memcpy(pad_block.data(), plaintext[num_blocks-1].data(), pad);
     }
-    
     for (int i=0; i<16; i++)
     {
-        xor_result[i] = char(pad_block[i]) ^ char(ciphertext[num_blocks-2][i]);
+        xor_result[i] = static_cast<char>(pad_block[i])  
+                      ^ static_cast<char>(ciphertext[num_blocks-2][i]);
     }
+    Block test= encrypt_block(xor_result, key);
     ciphertext.push_back(encrypt_block(xor_result, key));
-    ciphertext.push_back(encrypt_block(iv, key));
     
-    length = (num_blocks+1) * 16;
+    length = (num_blocks) * 16;
     return ciphertext;
 }             
 
 std::vector<Block> decrypt_cbc(const std::vector<Block>& ciphertext, size_t& length,
-                               const Key& key)
+                               const Key& key, const Block& iv)
 {
-    Block pad_block, iv, xor_input;
-    size_t num_blocks = length /16 -1;
-    length -= 16;
+    Block pad_block, xor_input;
+    size_t num_blocks = length /16;
     std::vector<Block> plaintext(num_blocks);
     
     std::memcpy(pad_block.data(), ciphertext[num_blocks].data(), 16);
-    iv = decrypt_block(pad_block, key);
     
     xor_input = decrypt_block(ciphertext[0],key);
     for (int i=0; i<16; i++)
     {
-        plaintext[0][i] = static_cast<char>(xor_input[i]) ^ static_cast<char>(iv[i]);
+        plaintext[0][i] = static_cast<char>(xor_input[i]) 
+                        ^ static_cast<char>(iv[i]);
     }
     
     for (size_t block=1; block<num_blocks; block++)
@@ -380,7 +380,7 @@ std::vector<Block> decrypt_cbc(const std::vector<Block>& ciphertext, size_t& len
         for (int i=0; i<16; i++)
         {
             plaintext[block][i] = static_cast<char>(xor_input[i]) 
-                                  ^ static_cast<char>(ciphertext[block-1][i]);
+                                ^ static_cast<char>(ciphertext[block-1][i]);
         }           
     }
     
@@ -402,12 +402,12 @@ std::vector<Block> decrypt_cbc(const std::vector<Block>& ciphertext, size_t& len
 Block generate_iv()
 {
     Block iv;
-    iv.fill('0');
-    srand (time(NULL));
-    for (int i=0; i<16; i++)
+    int readbytes = syscall(SYS_getrandom, iv.data(), 16, 0); 
+    if (readbytes != 16)
     {
-        iv[i] = (unsigned char)rand()%256;
+        //TODO: error
     }
+    
     return iv;
 }
 

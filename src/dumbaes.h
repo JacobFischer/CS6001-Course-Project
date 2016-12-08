@@ -29,6 +29,8 @@
 
 #pragma once
 
+//#define _GNU_SOURCE
+
 #include "word.h"
 #include <array>
 #include <algorithm>
@@ -38,6 +40,9 @@
 #include <functional>
 #include <memory>
 #include <vector>
+#include <unistd.h>
+#include <linux/random.h>
+#include <syscall.h>
 
 
 namespace dumbaes {
@@ -68,29 +73,50 @@ Block decrypt_block(const Block& block, const Key& key);
 // Then call these functions from api/.
 
 /**
- *  Takes  arrays of Block pointers containg the plaintext and
- *    ciphertext aling with a key and length of file read in. 
+ *  Takes a vector of Blocks containing the plaintext
+ *    along with a key and length (in bytes) of the data being encrypted.
+ *  All Blocks in 'plaintext' must be filled completely with data except for
+ *    the last block which can contain NULLs only after the data 
+ *  Will encrypt each plaintext block starting with the first block in 'plaintext'
+ *    using cipher block chaining. 
+ *  The length will be changed to reflect the new size (in bytes) of the ciphertext.
+ */ 
+std::vector<Block> encrypt_cbc(const std::vector<Block>& plaintext, size_t& length,
+                        const Key& key, const Block& new_iv);
+                        
+std::vector<Block> decrypt_cbc(const std::vector<Block>& ciphertext, size_t& length,
+                        const Key& key, const Block& new_iv);
+
+/**
+ *  Takes a vector of Blocks containing the plaintext
+ *    along with a key and length (in bytes) of the data being encrypted.
+ *  All Blocks in 'plaintext' must be filled completely with data except for
+ *    the last block which can contain NULLs only after the data 
  *  Will encrypt each plaintext block individually as per ecb mode operations
  *    and store it in ciphertext blocks
+ *  The length will be changed to reflect the size of of new ciphertext.
+ *  Will return a ciphertext vector of blocks containing the ciphertext
+ *    blocks.
+ *  The ciphertext vector will contain 'length' bytes of encrypted data with all
+ *    Blocks completely filled with data.
  */
 std::vector<Block> encrypt_ecb(const std::vector<Block>& plaintext, size_t& length,
                         const Key& key); 
                         
 /**
- *  Takes  arrays of Block pointers containg the plaintext and
- *    ciphertext aling with a key and length of file read in. 
+ *  Takes a vector of Blocks pcontaining the plaintext 
+ *    along with a key and length (in bytes) of the data to be decrypoted and returns
+ *    the plaintext in a vector.
+ *  All Blocks in 'ciphertext' must be completely filled with data.  
  *  Will decrypt each ciphertext block individually as per ecb mode operations
- *    and store it in ciphertext blocks.
- *  The size_t at 'length' will be modified to account for padding removal;
+ *    and store it in palintext blocks.
+ *  The length will be modified to account for padding removal;
+ *  All blocks in the plaintext vector will be completely filled with data, but only *    the first contigous updated 'length' bytes will contain meaningful data. The  
+ *    extra data is the leftover padding but can be ignored. 
  */                
 std::vector<Block> decrypt_ecb(const std::vector<Block>& ciphertext, size_t& length,
                         const Key& key);
                         
-std::vector<Block> encrypt_cbc(const std::vector<Block>& plaintext, size_t& length,
-                        const Key& key);
-                        
-std::vector<Block> decrypt_cbc(const std::vector<Block>& ciphertext, size_t& length,
-                        const Key& key);
 Block generate_iv();                 
 // Exposed only for unit tests.
 namespace internal {

@@ -193,9 +193,10 @@ decrypt_file (void)
 {
   char *ciphertext = NULL;
   char *key = NULL;
-  char *junk_iv = NULL;
-  unsigned char *plaintext = NULL;
+  char *plaintext = NULL;
   int ret = EXIT_FAILURE;
+  unsigned char *iv_encrypted = NULL;
+  unsigned char *iv_plain = NULL;
 
   ciphertext = read_ciphertext ();
   if (ciphertext == NULL)
@@ -209,16 +210,24 @@ decrypt_file (void)
   switch (aes_mode)
   {
     case CBC:
+      length -= 16;
+      iv_encrypted = (char*)malloc(16);
+      memcpy(iv_encrypted, ciphertext+length, 16);
+      iv_plain = dumbaes_128_decrypt_block((unsigned char *)iv_encrypted,
+                                           (unsigned char *)key);
       plaintext = dumbaes_128_decrypt_cbc ((unsigned char *)ciphertext,
                                            &length, 
                                            (unsigned char *)key,
-                                           (unsigned char *)junk_iv);
+                                           (unsigned char *)iv_plain);
       break;      
     case ECB:
       plaintext = dumbaes_128_decrypt_ecb ((unsigned char *)ciphertext,
                                            &length,
                                            (unsigned char *)key);
       break;
+    case TEST:
+      plaintext = dumbaes_128_decrypt_block ((unsigned char *)ciphertext,
+                                             (unsigned char *)key);
     default:
       //TODO: Add error
       break;      
@@ -227,6 +236,8 @@ decrypt_file (void)
   ret = write_to_output_file (plaintext);
 
 out:
+  free (iv_encrypted);
+  free (iv_plain);
   free (plaintext);
 
   g_free (ciphertext);
@@ -240,9 +251,12 @@ encrypt_file (void)
 {
   char *plaintext = NULL;
   char *key = NULL;
-  char *junk_iv = NULL;
-  unsigned char *ciphertext = NULL;
+  char *ciphertext = NULL;
+  char *ciphertext_no_iv = NULL;
   int ret = EXIT_FAILURE;
+  unsigned char *iv_encrypted = NULL;
+  unsigned char *iv_plain= NULL;
+
 
   plaintext = read_plaintext ();
   if (plaintext == NULL)
@@ -252,15 +266,22 @@ encrypt_file (void)
   if (key == NULL)
     goto out;
 
-  // TODO: Use CBC here instead.
+  
   
   switch (aes_mode)
   {
     case CBC:
-      ciphertext = dumbaes_128_encrypt_cbc ((unsigned char *)plaintext,
-                                            &length, 
-                                            (unsigned char *)key,
-                                            (unsigned char *)junk_iv);
+      iv_plain = dumbaes_128_generate_iv ();
+      ciphertext_no_iv = dumbaes_128_encrypt_cbc ((unsigned char *)plaintext,
+                                                  &length, 
+                                                  (unsigned char *)key,
+                                                  (unsigned char *)iv_plain);
+      iv_encrypted = dumbaes_128_encrypt_block ((unsigned char *)iv_plain,
+                                                (unsigned char *)key);
+      ciphertext = (char*)malloc(length + 16);
+      memcpy(ciphertext, ciphertext_no_iv, length);
+      memcpy(ciphertext+length, iv_encrypted, 16);
+      length += 16;
       break;
     case ECB:
       ciphertext = dumbaes_128_encrypt_ecb ((unsigned char *)plaintext,
@@ -279,6 +300,9 @@ encrypt_file (void)
 
 out:
   free (ciphertext);
+  free (ciphertext_no_iv);
+  free (iv_encrypted);
+  free (iv_plain);
 
   g_free (plaintext);
   g_free (key);

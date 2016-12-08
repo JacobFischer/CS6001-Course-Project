@@ -144,8 +144,10 @@ unsigned char *dumbaes_128_decrypt_ecb (const unsigned char *ciphertext,
                                         size_t              *length,
                                         const unsigned char *key);
 
-//#endif
-
+unsigned char *dumbaes_128_generate_iv (void);
+                                        
+                                        
+                                        
 #ifdef __cplusplus
 } // extern "C"
 #endif

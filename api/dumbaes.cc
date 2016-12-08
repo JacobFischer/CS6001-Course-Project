@@ -68,8 +68,6 @@ unsigned char* dumbaes_128_decrypt_block(const unsigned char* ciphertext,
     return result;
 }
 
-// TODO: rewrite ecb
-
 unsigned char* dumbaes_128_encrypt_cbc(const unsigned char* plaintext,
                                        size_t* length,
                                        const unsigned char* key,

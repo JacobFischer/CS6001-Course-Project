@@ -162,7 +162,6 @@ write_to_output_file (const unsigned char *output)
       goto out;
     }
 
-  // TODO: When switching to CBC, the third argument must be set to the right length.
   // Beware that |output| can contain embedded NULLs.
   
   if (!g_output_stream_write_all (g_io_stream_get_output_stream (G_IO_STREAM (iostream)),
@@ -192,12 +191,12 @@ static int
 decrypt_file (void)
 {
   char *ciphertext = NULL;
-  char *key = NULL;
-  char *plaintext = NULL;
+  char *key = NULL;  
   int ret = EXIT_FAILURE;
   unsigned char *iv_encrypted = NULL;
   unsigned char *iv_plain = NULL;
-
+  unsigned char *plaintext = NULL;
+  
   ciphertext = read_ciphertext ();
   if (ciphertext == NULL)
     goto out;
@@ -206,12 +205,11 @@ decrypt_file (void)
   if (key == NULL)
     goto out;
 
-  // TODO: Use CBC here instead.
   switch (aes_mode)
   {
     case CBC:
       length -= 16;
-      iv_encrypted = (char*)malloc(16);
+      iv_encrypted = (unsigned char*)malloc(16);
       memcpy(iv_encrypted, ciphertext+length, 16);
       iv_plain = dumbaes_128_decrypt_block((unsigned char *)iv_encrypted,
                                            (unsigned char *)key);
@@ -229,7 +227,8 @@ decrypt_file (void)
       plaintext = dumbaes_128_decrypt_block ((unsigned char *)ciphertext,
                                              (unsigned char *)key);
     default:
-      //TODO: Add error
+      g_fprintf (stderr, "Unable to select mode for decryption\n");
+      exit(EXIT_FAILURE);
       break;      
   }
   
@@ -250,10 +249,10 @@ static int
 encrypt_file (void)
 {
   char *plaintext = NULL;
-  char *key = NULL;
-  char *ciphertext = NULL;
-  char *ciphertext_no_iv = NULL;
+  char *key = NULL;  
   int ret = EXIT_FAILURE;
+  unsigned char *ciphertext = NULL;
+  unsigned char *ciphertext_no_iv = NULL;
   unsigned char *iv_encrypted = NULL;
   unsigned char *iv_plain= NULL;
 
@@ -278,7 +277,7 @@ encrypt_file (void)
                                                   (unsigned char *)iv_plain);
       iv_encrypted = dumbaes_128_encrypt_block ((unsigned char *)iv_plain,
                                                 (unsigned char *)key);
-      ciphertext = (char*)malloc(length + 16);
+      ciphertext = (unsigned char*)malloc(length + 16);
       memcpy(ciphertext, ciphertext_no_iv, length);
       memcpy(ciphertext+length, iv_encrypted, 16);
       length += 16;
@@ -292,7 +291,8 @@ encrypt_file (void)
       ciphertext = dumbaes_128_encrypt_block ((unsigned char *)plaintext,
                                               (unsigned char *)key);
     default:
-      //TODO: Add error
+      g_fprintf (stderr, "Unable to select mode for encryption\n");
+      exit(EXIT_FAILURE);
       break;   
   }
 
@@ -368,17 +368,17 @@ main (int argc, char **argv)
       goto out;
     }
     
-  if (!strcmp ("cbc", aes_mode_input))
+  if (!g_strcmp0 ("ecb", aes_mode_input))
     {
-      aes_mode = CBC;
+      aes_mode = ECB;
     }
-  else if (!strcmp ("test", aes_mode_input))
+  else if (!g_strcmp0 ("test", aes_mode_input))
     {
       aes_mode = TEST;
     }  
   else
     {
-      aes_mode = ECB;
+      aes_mode = CBC;
     }      
 
   if (ciphertext_filename != NULL)

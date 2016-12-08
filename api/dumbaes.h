@@ -65,9 +65,6 @@ unsigned char *dumbaes_128_encrypt_block (const unsigned char *plaintext,
 unsigned char *dumbaes_128_decrypt_block (const unsigned char *ciphertext,
                                           const unsigned char *key);
 
-//#if 0
-// TODO: Implement these functions
-
 /**
  * dumbaes_128_encrypt_cbc:
  * @plaintext: the plaintext to encrypt
@@ -79,7 +76,9 @@ unsigned char *dumbaes_128_decrypt_block (const unsigned char *ciphertext,
  * Both @key and @iv must be exactly 16 bytes long and need not be
  * %NULL-terminated. The data will be encrypted using cipher block
  * chaining. Note that @plaintext, @key, and @iv may all contain
- * embedded %NULL characters.
+ * embedded %NULL characters. The value of @length will be modified to
+ * reflect the size of the ciphertext. If no @iv is provided one will be 
+ * generated and @iv will be modified to contain the generated IV
  *
  * Returns: ciphertext of length @length. Free with free().
  */
@@ -98,7 +97,8 @@ unsigned char *dumbaes_128_encrypt_cbc (const unsigned char *plaintext,
  * Decrypts a @ciphertext encrypted by dumbaes_128_encrypt_cbc() of
  * length @length using the private key @key. Both @key and @iv must be
  * exactly 16 bytes long and need not be %NULL-terminated. Note that
- * @plaintext, @key, and @iv may all contain embedded %NULL characters.
+ * @plaintext, @key, and @iv may all contain embedded %NULL characters. The
+ * value of @length will be modified to reflect the size of the plaintext.
  *
  * Returns: plaintext of length @length. Free with free().
  */
@@ -144,6 +144,14 @@ unsigned char *dumbaes_128_decrypt_ecb (const unsigned char *ciphertext,
                                         size_t              *length,
                                         const unsigned char *key);
 
+/**
+ * dumbaes_128_generate_iv:
+ *
+ * Genrates a plaintext IV that can be used for CBC mode encryption and
+ * may contain %NULL characters due the random generation of data.
+ *
+ * Returns: a 16 byte iv. Free with free().
+ */
 unsigned char *dumbaes_128_generate_iv (void);
                                         
                                         

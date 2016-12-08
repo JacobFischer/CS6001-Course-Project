@@ -119,7 +119,9 @@ encrypt_button_activate_cb (void)
   char *input = NULL;
   char *key = NULL;
   char *display_string = NULL;
-  char *junk_iv=NULL;
+  unsigned char *ciphertext_no_iv = NULL;
+  unsigned char *iv_encrypted = NULL;
+  unsigned char *iv_plain= NULL;
 
   if (input_file == NULL || key_file == NULL)
     {
@@ -135,11 +137,20 @@ encrypt_button_activate_cb (void)
   if (key == NULL)
     goto out;
 
-  // TODO: Use CBC here instead.
   g_clear_pointer (&result, free);
-  result = dumbaes_128_encrypt_cbc ((unsigned char *)input, &length,
-                                    (unsigned char *)key, (unsigned char *)junk_iv);
   
+  iv_plain = dumbaes_128_generate_iv ();
+  ciphertext_no_iv = dumbaes_128_encrypt_cbc ((unsigned char *)input,
+                                              &length, 
+                                              (unsigned char *)key,
+                                              (unsigned char *)iv_plain);
+  iv_encrypted = dumbaes_128_encrypt_block ((unsigned char *)iv_plain,
+                                            (unsigned char *)key);
+  result = (unsigned char*)malloc(length + 16);
+  memcpy(result, ciphertext_no_iv, length);
+  memcpy(result+length, iv_encrypted, 16);
+  length += 16;
+
   display_string = g_strdup_printf ("Encryption: DONE :)");
   gtk_label_set_text (GTK_LABEL (result_label), display_string);
   gtk_widget_show (result_label);
@@ -148,6 +159,10 @@ encrypt_button_activate_cb (void)
   displaying_ciphertext = TRUE;
 
 out:
+  free (ciphertext_no_iv);
+  free (iv_encrypted);
+  free (iv_plain);
+  
   g_free (display_string);
   g_free (input);
   g_free (key);
@@ -159,7 +174,8 @@ decrypt_button_activate_cb (void)
   char *input = NULL;
   char *key = NULL;
   char *display_string = NULL;
-  char *junk_iv = NULL;
+  unsigned char *iv_encrypted = NULL;
+  unsigned char *iv_plain = NULL;
 
   if (input_file == NULL || key_file == NULL)
     {
@@ -175,10 +191,18 @@ decrypt_button_activate_cb (void)
   if (key == NULL)
     goto out;
 
-  // TODO: Use CBC here instead.
   g_clear_pointer (&result, free);
-  result = dumbaes_128_decrypt_cbc ((unsigned char *)input, &length,
-                                    (unsigned char *)key, (unsigned char *)junk_iv);
+  
+  length -= 16;
+  iv_encrypted = (unsigned char*)malloc(16);
+  memcpy(iv_encrypted, input+length, 16);
+  iv_plain = dumbaes_128_decrypt_block((unsigned char *)iv_encrypted,
+                                       (unsigned char *)key);
+  result = dumbaes_128_decrypt_cbc ((unsigned char *)input,
+                                    &length, 
+                                    (unsigned char *)key,
+                                    (unsigned char *)iv_plain);
+
   display_string = g_strdup_printf ("Decryption: DONE :)");
   gtk_label_set_text (GTK_LABEL (result_label), display_string);
   gtk_widget_show (result_label);
@@ -187,6 +211,9 @@ decrypt_button_activate_cb (void)
   displaying_ciphertext = FALSE;
 
 out:
+  free (iv_encrypted);
+  free (iv_plain);
+
   g_free (display_string);
   g_free (input);
   g_free (key);
@@ -212,7 +239,6 @@ write_to_output_file (const char *output_filename)
       goto out;
     }
 
-    // TODO: When switching to CBC, the third argument must be set to the right length.
   // Beware that |result| can contain embedded NULLs.
   if (!g_output_stream_write_all (g_io_stream_get_output_stream (G_IO_STREAM (iostream)),
                                   result,

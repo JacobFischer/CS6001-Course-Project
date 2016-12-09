@@ -46,7 +46,7 @@ unsigned char* dumbaes_128_encrypt_block(const unsigned char* plaintext,
 
     Block ciphertext = encrypt_block(datablock, keyblock);
 
-    unsigned char* result = static_cast<unsigned char*>(std::malloc(16));
+    auto result = static_cast<unsigned char*>(std::malloc(16));
     std::memcpy(result, ciphertext.data(), 16);
     return result;
 }
@@ -62,42 +62,104 @@ unsigned char* dumbaes_128_decrypt_block(const unsigned char* ciphertext,
 
     Block plaintext = decrypt_block(datablock, keyblock);
 
-    unsigned char* result = static_cast<unsigned char*>(std::malloc(16));
+    auto result = static_cast<unsigned char*>(std::malloc(16));
     std::memcpy(result, plaintext.data(), 16);
     return result;
 }
 
-#if 0
-// TODO: Note these functions should just be C API wrappers around C++
-// functions implemented in the src/ directory.
-
 unsigned char* dumbaes_128_encrypt_cbc(const unsigned char* plaintext,
-                                       size_t length,
+                                       size_t* length,
                                        const unsigned char* key,
                                        const unsigned char* iv)
 {
-    // TODO
+    Key keyblock;
+    std::memcpy(keyblock.data(), key, 16);
+    
+    Block iv_block;
+    std::memcpy(iv_block.data(), iv, 16);
+    
+    size_t num_blocks = (*length / 16) + 1;
+    std::vector<Block> plaintext_vector(num_blocks);
+    
+    std::memcpy(plaintext_vector[0].data(), plaintext, *length);
+    
+    std::vector<Block> ciphertext_vector = encrypt_cbc(plaintext_vector, *length,
+                                                       keyblock, iv_block);
+    auto result = static_cast<unsigned char*>(std::malloc(*length));
+    std::memcpy(result, ciphertext_vector.data(), *length);
+    
+    return result;
 }
 
 unsigned char* dumbaes_128_decrypt_cbc(const unsigned char* ciphertext,
-                                       size_t length,
+                                       size_t* length,
                                        const unsigned char* key,
                                        const unsigned char* iv)
 {
-    // TODO
+    Key keyblock;
+    std::memcpy(keyblock.data(), key, 16);
+    
+    Block iv_block;
+    std::memcpy(iv_block.data(), iv, 16);
+    
+    size_t num_blocks = *length / 16;
+    std::vector<Block> ciphertext_vector(num_blocks);
+    
+    std::memcpy(ciphertext_vector[0].data(), ciphertext, *length);
+    std::vector<Block> plaintext_vector = decrypt_cbc(ciphertext_vector, *length,
+                                                      keyblock, iv_block);
+    auto result = static_cast<unsigned char*>(std::malloc(*length));
+    std::memcpy(result, plaintext_vector.data(), *length);
+
+    return result;
 }
 
 unsigned char* dumbaes_128_encrypt_ecb(const unsigned char* plaintext,
-                                       size_t length,
+                                       size_t* length,
                                        const unsigned char* key)
 {
-    // TODO
+    Key keyblock;
+    std::memcpy(keyblock.data(), key, 16);
+
+    size_t num_blocks = *length / 16 + 1;
+    
+    std::vector<Block> plaintext_vector(num_blocks);
+    std::memcpy(plaintext_vector[0].data(), plaintext, *length);
+    
+    std::vector<Block> ciphertext_vector = encrypt_ecb(plaintext_vector, *length,
+                                                       keyblock);
+                                                       
+    auto result = static_cast<unsigned char*>(std::malloc(*length));
+    std::memcpy(result, ciphertext_vector[0].data(), *length);
+    
+    return result;
 }
 
 unsigned char* dumbaes_128_decrypt_ecb(const unsigned char* ciphertext,
-                                       size_t length,
+                                       size_t* length,
                                        const unsigned char* key)
 {
-    // TODO
+    Key keyblock;
+    std::memcpy(keyblock.data(), key, 16);
+
+    size_t num_blocks = *length / 16;
+    
+    std::vector<Block> ciphertext_vector(num_blocks);
+    std::memcpy(&ciphertext_vector[0], ciphertext, *length);
+    
+    std::vector<Block> plaintext_vector = decrypt_ecb(ciphertext_vector, *length,
+                                                      keyblock);
+    auto result = static_cast<unsigned char*>(std::malloc(*length));
+    std::memcpy(result, &plaintext_vector[0], *length);
+    
+    return result;
 }
-#endif
+
+unsigned char* dumbaes_128_generate_iv()
+{
+    Block iv = generate_iv();
+    auto result = static_cast<unsigned char*>(std::malloc(16));
+    std::memcpy(result, iv.data(), 16);
+
+    return result;
+}

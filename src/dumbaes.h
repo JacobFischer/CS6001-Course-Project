@@ -31,8 +31,17 @@
 
 #include "word.h"
 #include <array>
+#include <algorithm>
 #include <cstdint>
+#include <cstdlib>
 #include <functional>
+#include <linux/random.h>
+#include <syscall.h>
+#include <unistd.h>
+#include <vector>
+
+
+
 
 namespace dumbaes {
 
@@ -41,6 +50,7 @@ using Block = std::array<uint8_t, 16>;
 
 // This would need to be changed to 24 or 32 for AES-192 or AES-256.
 using Key = std::array<uint8_t, 16>;
+
 
 /**
  * It encrypts one block of data with the specified key. This probably shouldn't
@@ -56,10 +66,71 @@ Block encrypt_block(const Block& block, const Key& key);
  */
 Block decrypt_block(const Block& block, const Key& key);
 
-// TODO: Add functions that take an arbitrary-length block of data and a key,
-// encrypt/decrypt the data using the above functions and cipher-block chaining.
-// Then call these functions from api/.
+/**
+ *  Takes a vector of Blocks containing the plaintext
+ *  along with a key and length (in bytes) of the data being encrypted.
+ *  All Blocks in 'plaintext' must be filled completely with data except for
+ *  the last block which can contain NULLs only after the data 
+ *  Will encrypt each plaintext block starting with the first block in 'plaintext'
+ *  using cipher block chaining. 
+ *  The IV must be in plaintext form.
+ *  The length will be changed to reflect the new size (in bytes) of the ciphertext.
+ */ 
+std::vector<Block> encrypt_cbc(const std::vector<Block>& plaintext, size_t& length,
+                        const Key& key, const Block& new_iv);
 
+/**
+ *  Takes a vector of Blocks pcontaining the ciphertext 
+ *  along with a key and length (in bytes) of the data to be decrypoted and returns
+ *  the plaintext in a vector.
+ *  All Blocks in 'ciphertext' must be completely filled with data.  
+ *  Will decrypt each ciphertext block individually as per cbc mode operations
+ *  and store it in palintext blocks.
+ *  The length will be modified to account for padding removal.
+ *  The IV must be in plaintext form.
+ *  All blocks in the plaintext vector will be completely filled with data, but only *  the first contigous updated 'length' bytes will contain meaningful data. The  
+ *  extra data is the leftover padding but can be ignored. 
+ */                         
+std::vector<Block> decrypt_cbc(const std::vector<Block>& ciphertext, size_t& length,
+                        const Key& key, const Block& new_iv);
+
+/**
+ *  Takes a vector of Blocks containing the plaintext
+ *  along with a key and length (in bytes) of the data being encrypted.
+ *  All Blocks in 'plaintext' must be filled completely with data except for
+ *  the last block which can contain NULLs only after the data 
+ *  Will encrypt each plaintext block individually as per ecb mode operations
+ *  and store it in ciphertext blocks
+ *  The length will be changed to reflect the size of of new ciphertext.
+ *  Will return a ciphertext vector of blocks containing the ciphertext
+ *  blocks.
+ *  The return ciphertext vector will contain 'length' bytes of encrypted data with *  all Blocks completely filled with data.
+ */
+std::vector<Block> encrypt_ecb(const std::vector<Block>& plaintext, size_t& length,
+                        const Key& key); 
+                        
+/**
+ *  Takes a vector of Blocks containing the ciphertext 
+ *  along with a key and length (in bytes) of the data to be decrypoted and returns
+ *  the plaintext in a vector.
+ *  All Blocks in 'ciphertext' must be completely filled with data.  
+ *  Will decrypt each ciphertext block individually as per ecb mode operations
+ *  and store it in palintext blocks.
+ *  The length will be modified to account for padding removal;
+ *  All blocks in the plaintext vector will be completely filled with data, but only *  the first contigous updated 'length' bytes will contain meaningful data. The  
+ *  extra data is the leftover padding but can be ignored. 
+ */                
+std::vector<Block> decrypt_ecb(const std::vector<Block>& ciphertext, size_t& length,
+                        const Key& key);
+
+/**
+ *  Function returns a BLock containing a randomly generated 
+ *  IV using the Linux getrandom system call.
+ *  As such a Linux system with kernal kernel >= 3.17 is required 
+ *  for this function to work.
+ */
+Block generate_iv(); 
+                
 // Exposed only for unit tests.
 namespace internal {
 

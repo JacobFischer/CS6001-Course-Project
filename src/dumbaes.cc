@@ -262,6 +262,158 @@ Block decrypt_block(const Block& block, const Key& key)
     return state_to_block(std::move(state));
 }
 
+std::vector<Block> encrypt_cbc(const std::vector<Block>& plaintext, size_t& length,
+                               const Key& key, const Block& iv)
+{
+    Block pad_block, xor_result;
+    std::vector<Block> ciphertext;
+    
+    size_t num_blocks = length /16 +1;
+    size_t pad = length % 16;
+    char pad_char = '0' + pad;
+    
+    for (int i=0; i<16; i++)
+    {
+        xor_result[i] = static_cast<char>(plaintext[0][i]) 
+                      ^ static_cast<char>(iv[i]);
+    }
+    ciphertext.push_back(encrypt_block(xor_result, key));
+    for (size_t block=1; block<num_blocks-1; block++)
+    {
+        for (int i=0; i<16; i++)
+        {
+            xor_result[i] = static_cast<char>(plaintext[block][i]) 
+                          ^ static_cast<char>(ciphertext[block-1][i]);
+        }
+        ciphertext.push_back(encrypt_block(xor_result, key));
+    }
+    
+    pad_block.fill(pad_char);
+    if (pad != 0)
+    {
+        std::memcpy(pad_block.data(), plaintext[num_blocks-1].data(), pad);
+    }
+    for (int i=0; i<16; i++)
+    {
+        xor_result[i] = static_cast<char>(pad_block[i])  
+                      ^ static_cast<char>(ciphertext[num_blocks-2][i]);
+    }
+    ciphertext.push_back(encrypt_block(xor_result, key));
+    
+    length = (num_blocks) * 16;
+    return ciphertext;
+}             
+
+std::vector<Block> decrypt_cbc(const std::vector<Block>& ciphertext, size_t& length,
+                               const Key& key, const Block& iv)
+{
+    Block pad_block, xor_input;
+    size_t num_blocks = length /16;
+    std::vector<Block> plaintext(num_blocks);
+    
+    std::memcpy(pad_block.data(), ciphertext[num_blocks].data(), 16);
+    
+    xor_input = decrypt_block(ciphertext[0],key);
+    for (int i=0; i<16; i++)
+    {
+        plaintext[0][i] = static_cast<char>(xor_input[i]) 
+                        ^ static_cast<char>(iv[i]);
+    }
+    
+    for (size_t block=1; block<num_blocks; block++)
+    {
+        xor_input = decrypt_block(ciphertext[block],key);
+        for (int i=0; i<16; i++)
+        {
+            plaintext[block][i] = static_cast<char>(xor_input[i]) 
+                                ^ static_cast<char>(ciphertext[block-1][i]);
+        }           
+    }
+    
+    char pad_char = plaintext[num_blocks-1][15];
+    if (pad_char == '0')
+    {
+        length -= 16;
+    }
+    else
+    {
+        size_t pad = pad_char-'0';
+        length -= (16-pad);
+    }
+    
+    return plaintext;
+}  
+
+std::vector<Block> encrypt_ecb(const std::vector<Block>& plaintext, size_t& length,
+                               const Key& key)
+{
+    Block pad_block;
+    
+    size_t num_blocks = (length / 16) + 1;
+    size_t pad = length % 16;
+    char pad_char = '0' + pad;
+    std::vector<Block> ciphertext;
+    for (size_t block=0; block<num_blocks-1; block++)
+    {
+        ciphertext.push_back(encrypt_block(plaintext[block], key));
+    }
+    
+    pad_block.fill(pad_char);
+    if (pad != 0)
+    {
+        std::memcpy(pad_block.data(), plaintext[num_blocks-1].data(), pad);
+    }
+    
+    ciphertext.push_back(encrypt_block(pad_block, key));
+    
+    length = (num_blocks) * 16;
+    
+    return ciphertext;
+} 
+
+std::vector<Block> decrypt_ecb(const std::vector<Block>& ciphertext, size_t& length,
+                               const Key& key)
+{
+    size_t num_blocks = length / 16;
+    size_t pad = 0;
+    std::vector<Block> plaintext;
+
+    for (size_t block = 0; block < num_blocks; block++)
+    {
+        plaintext.push_back(decrypt_block(ciphertext[block], key));
+    }
+    
+    char pad_char = plaintext[num_blocks-1][15];
+    if (pad_char == '0')
+    {
+        length -= 16;
+    }
+    else
+    {
+        pad = pad_char-'0';
+        length -= (16-pad);
+    }
+    
+    return plaintext;
+}
+           
+Block generate_iv()
+{
+    Block iv;
+    int readbytes = 0;
+    while (readbytes != 16)
+    {
+        readbytes = syscall(SYS_getrandom, iv.data(), 16, 0);
+        if(errno == EINTR)
+        {
+            readbytes = 0;
+            continue;
+        }
+    }
+    
+    return iv;
+}
+
 static Word substitute_word(Word word)
 {
     return Word{substitute_byte(word[0]),

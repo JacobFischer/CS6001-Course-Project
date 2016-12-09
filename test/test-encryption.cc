@@ -33,6 +33,7 @@
 #include <cstring>
 #include <glib.h>
 #include <nettle/aes.h>
+#inclide <vector>
 
 using namespace dumbaes;
 
@@ -340,6 +341,13 @@ static void test_nettle_comparison(const Block& input,
     g_assert_cmpmem(dumbaes_output.data(), 16, nettle_output.data(), 16);
 }
 
+static void test_nettle_comparison_cbc(const std::vector<Block>& input,
+                                       const Key& key,
+                                       const size_t& length_plain,
+                                       const std::vector<Block>& dumnase_output)
+{
+    
+}    
 
 static void test_encryption_decrypt()
 {

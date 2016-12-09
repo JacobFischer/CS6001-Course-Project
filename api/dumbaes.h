@@ -30,9 +30,12 @@
 #ifndef DUMBAES_H
 #define DUMBAES_H
 
+#include <stdlib.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 
 /**
  * dumbaes_128_encrypt_block:
@@ -62,13 +65,10 @@ unsigned char *dumbaes_128_encrypt_block (const unsigned char *plaintext,
 unsigned char *dumbaes_128_decrypt_block (const unsigned char *ciphertext,
                                           const unsigned char *key);
 
-#if 0
-// TODO: Implement these functions
-
 /**
  * dumbaes_128_encrypt_cbc:
  * @plaintext: the plaintext to encrypt
- * @length: length of the plaintext to encrypt, in bytes
+ * @length: pointer length of the plaintext to encrypt, in bytes
  * @key: the private key to use for the encryption
  * @iv: the initialization vector to use for the encryption
  *
@@ -76,38 +76,40 @@ unsigned char *dumbaes_128_decrypt_block (const unsigned char *ciphertext,
  * Both @key and @iv must be exactly 16 bytes long and need not be
  * %NULL-terminated. The data will be encrypted using cipher block
  * chaining. Note that @plaintext, @key, and @iv may all contain
- * embedded %NULL characters.
+ * embedded %NULL characters. The value of @length will be modified to
+ * reflect the size of the ciphertext. 
  *
  * Returns: ciphertext of length @length. Free with free().
  */
 unsigned char *dumbaes_128_encrypt_cbc (const unsigned char *plaintext,
-                                        size_t               length,
+                                        size_t              *length,
                                         const unsigned char *key,
                                         const unsigned char *iv);
 
 /**
  * dumbaes_128_decrypt_cbc:
  * @ciphertext: the ciphertext to decrypt
- * @length: length of the ciphertext to decrypt, in bytes
+ * @length: pointer length of the ciphertext to decrypt, in bytes
  * @key: the private key to use for the decryption
  * @iv: the initialization vector to use for the decryption
  *
  * Decrypts a @ciphertext encrypted by dumbaes_128_encrypt_cbc() of
  * length @length using the private key @key. Both @key and @iv must be
  * exactly 16 bytes long and need not be %NULL-terminated. Note that
- * @plaintext, @key, and @iv may all contain embedded %NULL characters.
+ * @plaintext, @key, and @iv may all contain embedded %NULL characters. The
+ * value of @length will be modified to reflect the size of the plaintext.
  *
  * Returns: plaintext of length @length. Free with free().
  */
-unsigned char *dumbaes_128_encrypt_cbc (const char          *ciphertext,
-                                        size_t               length,
+unsigned char *dumbaes_128_decrypt_cbc (const unsigned char *ciphertext,
+                                        size_t              *length,
                                         const unsigned char *key,
                                         const unsigned char *iv);
 
 /**
  * dumbaes_128_encrypt_ecb:
  * @plaintext: the plaintext to encrypt
- * @length: length of the plaintext to encrypt, in bytes
+ * @length: pointer to length of the plaintext to encrypt, in bytes
  * @key: the private key to use for the encryption
  *
  * Encrypts a @plaintext of length @length using the private key @key.
@@ -121,13 +123,13 @@ unsigned char *dumbaes_128_encrypt_cbc (const char          *ciphertext,
  * Returns: ciphertext of length @length. Free with free().
  */
 unsigned char *dumbaes_128_encrypt_ecb (const unsigned char *plaintext,
-                                        size_t               length,
+                                        size_t              *length,
                                         const unsigned char *key);
 
 /**
  * dumbaes_128_decrypt_ecb:
  * @ciphertext: the ciphertext to decrypt
- * @length: length of the ciphertext to decrypt, in bytes
+ * @length: pointer to length of the ciphertext to decrypt, in bytes
  * @key: the private key to use for the decryption
  *
  * Decrypts a @ciphertext encrypted by dumbaes_128_encrypt_ecb() of
@@ -137,12 +139,23 @@ unsigned char *dumbaes_128_encrypt_ecb (const unsigned char *plaintext,
  *
  * Returns: plaintext of length @length. Free with free().
  */
-unsigned char *dumbaes_128_encrypt_ecb (const char          *ciphertext,
-                                        size_t               length,
+unsigned char *dumbaes_128_decrypt_ecb (const unsigned char *ciphertext,
+                                        size_t              *length,
                                         const unsigned char *key);
 
-#endif
-
+/**
+ * dumbaes_128_generate_iv:
+ *
+ * Genrates a plaintext IV that can be used for CBC mode encryption and
+ * may contain %NULL characters due the random generation of data. This
+ * requires that the system is running a Linux kernal version at 3.17
+ *
+ * Returns: a 16 byte iv. Free with free().
+ */
+unsigned char *dumbaes_128_generate_iv (void);
+                                        
+                                        
+                                        
 #ifdef __cplusplus
 } // extern "C"
 #endif

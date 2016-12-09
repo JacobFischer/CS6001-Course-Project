@@ -81,7 +81,6 @@ read_file (GFile *file, gboolean is_key)
       length = contents_length;
     }      
 
-  // TODO: Remove length restriction when switching to CBC.
   if (contents_length < 16)
     {
       char *message = g_strdup_printf ("Read %" G_GSIZE_FORMAT " bytes from %s, but file must be 16 bytes long\n",
@@ -121,7 +120,7 @@ encrypt_button_activate_cb (void)
   char *display_string = NULL;
   unsigned char *ciphertext_no_iv = NULL;
   unsigned char *iv_encrypted = NULL;
-  unsigned char *iv_plain= NULL;
+  unsigned char *iv_plain = NULL;
 
   if (input_file == NULL || key_file == NULL)
     {
@@ -146,6 +145,8 @@ encrypt_button_activate_cb (void)
                                               (unsigned char *)iv_plain);
   iv_encrypted = dumbaes_128_encrypt_block ((unsigned char *)iv_plain,
                                             (unsigned char *)key);
+  //Append IV to ciphertext so ciphertext and IV are conveniently stored in one 
+  //  location. No need to remember which IV goes with which ciphertext
   result = (unsigned char*)malloc(length + 16);
   memcpy(result, ciphertext_no_iv, length);
   memcpy(result+length, iv_encrypted, 16);

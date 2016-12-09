@@ -32,7 +32,6 @@
 #include "src/dumbaes.h"
 #include <cstdlib>
 #include <cstring>
-#include <memory>
 
 using namespace dumbaes;
 

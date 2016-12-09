@@ -77,8 +77,7 @@ unsigned char *dumbaes_128_decrypt_block (const unsigned char *ciphertext,
  * %NULL-terminated. The data will be encrypted using cipher block
  * chaining. Note that @plaintext, @key, and @iv may all contain
  * embedded %NULL characters. The value of @length will be modified to
- * reflect the size of the ciphertext. If no @iv is provided one will be 
- * generated and @iv will be modified to contain the generated IV
+ * reflect the size of the ciphertext. 
  *
  * Returns: ciphertext of length @length. Free with free().
  */
@@ -148,7 +147,8 @@ unsigned char *dumbaes_128_decrypt_ecb (const unsigned char *ciphertext,
  * dumbaes_128_generate_iv:
  *
  * Genrates a plaintext IV that can be used for CBC mode encryption and
- * may contain %NULL characters due the random generation of data.
+ * may contain %NULL characters due the random generation of data. This
+ * requires that the system is running a Linux kernal version at 3.17
  *
  * Returns: a 16 byte iv. Free with free().
  */

@@ -11,6 +11,7 @@ Requirements for tarball builds:
  * A C++14 compiler for binary literals. (GCC 5 should work. Tested with GCC 6.)
  * GLib >= 2.32 (only for the tests and demos).
  * GTK+ >= 3.10 (only for the demo GUI).
+ * Linux kernal >= 3.17.
  * nettle >= 3.0 (only for the tests).
 
 Those versions are pretty much arbitrary guesses and are not enforced at
@@ -37,12 +38,17 @@ you hit compiler warnings is to pass --disable-Werror to configure.
 
 Once it's built, use the example program to encrypt something:
 
-demos/dumbaes-cli -o output_filename -k private_key_filename -e plaintext_filename
+demos/dumbaes-cli -o output_filename -k private_key_filename -e plaintext_filename -m cbc
 
 Or to decrypt something:
 
-demos/dumbaes-cli -o output_filename -k private_key_filename -d ciphertext_filename
+demos/dumbaes-cli -o output_filename -k private_key_filename -d ciphertext_filename -m cbc
 
+-o: File to output results.
+-k: File containing the AES key.
+-d: File to decrypt.
+-e: File to encrypt.
+-m: AES mode. Currently supports CBC 'cbc' or ECB 'ecb'
 (Note that the file containing the private key must be exactly 16 bytes long.
 Also note that you'll want a hex viewer like xxd to make sense of the result.)
 

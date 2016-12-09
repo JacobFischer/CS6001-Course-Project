@@ -50,9 +50,6 @@ static char *aes_mode_input = NULL;
 static size_t length;
 static AESMode aes_mode = CBC;
 
-
-
-
 static char *
 read_ciphertext (void)
 {
@@ -100,9 +97,6 @@ read_plaintext (void)
       return NULL;
     }
   
-  
-
-  // TODO: Remove length restriction when switching to CBC.
   if (plaintext_length < 16)
     {
       g_fprintf (stderr,
@@ -227,8 +221,7 @@ decrypt_file (void)
       plaintext = dumbaes_128_decrypt_block ((unsigned char *)ciphertext,
                                              (unsigned char *)key);
     default:
-      g_fprintf (stderr, "Unable to select mode for decryption\n");
-      exit(EXIT_FAILURE);
+      g_assert_not_reached();
       break;      
   }
   
@@ -264,9 +257,7 @@ encrypt_file (void)
   key = read_private_key ();
   if (key == NULL)
     goto out;
-
-  
-  
+ 
   switch (aes_mode)
   {
     case CBC:
@@ -277,6 +268,8 @@ encrypt_file (void)
                                                   (unsigned char *)iv_plain);
       iv_encrypted = dumbaes_128_encrypt_block ((unsigned char *)iv_plain,
                                                 (unsigned char *)key);
+      //Append IV to ciphertext so ciphertext and IV are conveniently stored in one 
+      //  location. No need to remember which IV goes with which ciphertext
       ciphertext = (unsigned char*)malloc(length + 16);
       memcpy(ciphertext, ciphertext_no_iv, length);
       memcpy(ciphertext+length, iv_encrypted, 16);
@@ -285,7 +278,7 @@ encrypt_file (void)
     case ECB:
       ciphertext = dumbaes_128_encrypt_ecb ((unsigned char *)plaintext,
                                             &length,
-                                            (unsigned char *)key);  
+                                            (unsigned char *)key); 
       break;
     case TEST:
       ciphertext = dumbaes_128_encrypt_block ((unsigned char *)plaintext,

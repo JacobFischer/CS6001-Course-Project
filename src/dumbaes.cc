@@ -298,7 +298,6 @@ std::vector<Block> encrypt_cbc(const std::vector<Block>& plaintext, size_t& leng
         xor_result[i] = static_cast<char>(pad_block[i])  
                       ^ static_cast<char>(ciphertext[num_blocks-2][i]);
     }
-    Block test= encrypt_block(xor_result, key);
     ciphertext.push_back(encrypt_block(xor_result, key));
     
     length = (num_blocks) * 16;
@@ -401,10 +400,15 @@ std::vector<Block> decrypt_ecb(const std::vector<Block>& ciphertext, size_t& len
 Block generate_iv()
 {
     Block iv;
-    int readbytes = syscall(SYS_getrandom, iv.data(), 16, 0); 
-    if (readbytes != 16)
+    int readbytes = 0;
+    while (readbytes != 16)
     {
-        //TODO: error
+        readbytes = syscall(SYS_getrandom, iv.data(), 16, 0);
+        if(errno == EINTR)
+        {
+            readbytes = 0;
+            continue;
+        }
     }
     
     return iv;

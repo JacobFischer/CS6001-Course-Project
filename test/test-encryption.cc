@@ -33,7 +33,7 @@
 #include <cstring>
 #include <glib.h>
 #include <nettle/aes.h>
-#inclide <vector>
+#include <vector>
 
 using namespace dumbaes;
 
@@ -326,13 +326,6 @@ static void test_nettle_comparison(const Block& input,
                                    const Key& key,
                                    const Block& dumbaes_output)
 {
-    // TODO: Once CBC is implemented, add a test that uses nettle with different
-    // sizes of input blocks and verifies that our output is the same. That will
-    // require changing this function to accept strings instead of blocks, and
-    // not hardcoding 16 bytes here. It will also require passing
-    // aes128_encrypt() as a parameter to CBC_ENCRYPT() instead of calling it
-    // directly: http://www.lysator.liu.se/~nisse/nettle/nettle.html#CBC
-
     Block nettle_output;
     struct aes128_ctx context;
     aes128_set_encrypt_key(&context, key.data());
@@ -344,9 +337,19 @@ static void test_nettle_comparison(const Block& input,
 static void test_nettle_comparison_cbc(const std::vector<Block>& input,
                                        const Key& key,
                                        const size_t& length_plain,
-                                       const std::vector<Block>& dumnase_output)
+                                       const Block& iv,
+                                       const std::vector<Block>& dumbaes_output)
 {
-    
+    size_t num_blocks = length_plain / 16 + 1;
+    std::vector<Block> nettle_output;
+    nettle_output.reserve(num_blocks);
+    struct aes128_ctx context;
+    aes128_set_encrypt_key(&context, key.data());
+    cbc_encrypt(&context, &aes128_encrypt, 16, iv.data(), length,
+                nettle_output[0].data(), input[0].data());
+                
+    g_assert_cmpmem(dumbaes_output[0].data(), 16*num_blocks, nettle_output[0].data(),
+                    16*num_blocks);            
 }    
 
 static void test_encryption_decrypt()
@@ -371,7 +374,43 @@ static void test_encryption_decrypt()
         // Verify that our decrypted result is the same as what we passed in.
         Block plaintext = decrypt_block(ciphertext, key);
         for (int j = 0; j < 16; j++)
-            g_assert_cmphex(input[j], ==, plaintext[j]);
+            g_assert_cmphex(input[j], ==, plaintext[j]);        
+    }
+}
+
+static void test_cbc_encryption_decrypt()
+{
+    for (int i = 0; i < 1000; i++) {
+        std::vector<Block> input;
+        for (int j = 0; j < 10; j++) {
+            Block input_block = {random_byte(), random_byte(), random_byte(), 
+                                 random_byte(), random_byte(), random_byte(),
+                                 random_byte(), random_byte(), random_byte(), 
+                                 random_byte(), random_byte(), random_byte(),
+                                 random_byte(), random_byte(), random_byte(), 
+                                 random_byte()};
+            input.pushback(input_block);               
+        }
+        Block iv = {random_byte(), random_byte(), random_byte(), random_byte(),
+                    random_byte(), random_byte(), random_byte(), random_byte(),
+                    random_byte(), random_byte(), random_byte(), random_byte(),
+                    random_byte(), random_byte(), random_byte(), random_byte()};
+
+        Key key = {random_byte(), random_byte(), random_byte(), random_byte(),
+                   random_byte(), random_byte(), random_byte(), random_byte(),
+                   random_byte(), random_byte(), random_byte(), random_byte(),
+                   random_byte(), random_byte(), random_byte(), random_byte()};
+
+        // Verify that our result is the same as what nettle gives.
+        size_t length = 160;
+        std::vector<Block> ciphertext = encrypt_cbc(input, length, key, iv);
+        test_nettle_comparison_cbc(input, key, 160, iv, ciphertext);
+
+        // Verify that our decrypted result is the same as what we passed in.
+        syd::vector<Block> plaintext = decrypt_cbc(ciphertext, length, key, iv);
+        for (int j = 0; j < 10; j++)
+            for (int k = 0; k < 16; k++)
+                g_assert_cmphex(input[j][k], ==, plaintext[j][k]);     
     }
 }
 
@@ -405,6 +444,7 @@ int main(int argc, char* argv[])
     g_test_add_func("/Encryption/state", test_encryption_state);
     g_test_add_func("/Encryption/decrypt", test_encryption_decrypt);
     g_test_add_func("/Encryption/c_api", test_c_api);
+    g_test_add_func("/Encryption/cbc", test_cbc_encryption_decrypt);
 
     return g_test_run();
 }

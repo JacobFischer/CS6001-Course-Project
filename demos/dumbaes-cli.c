@@ -221,7 +221,7 @@ decrypt_file (void)
       plaintext = dumbaes_128_decrypt_block ((unsigned char *)ciphertext,
                                              (unsigned char *)key);
     default:
-      g_assert_not_reached ();
+      g_assert_not_reached();
       break;      
   }
   

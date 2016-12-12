@@ -403,8 +403,12 @@ Block generate_iv()
     int readbytes = 0;
     while (readbytes != 16)
     {
-        readbytes = 0;
         readbytes = syscall(SYS_getrandom, iv.data(), 16, 0);
+        if(errno == EINTR)
+        {
+            readbytes = 0;
+            continue;
+        }
     }
     
     return iv;

@@ -344,27 +344,16 @@ static void test_nettle_comparison(const Block& input,
 static void test_nettle_comparison_cbc(const std::vector<Block>& input,
                                        const Key& key,
                                        const size_t& length_plain,
-                                       const Block& iv,
                                        const std::vector<Block>& dumnase_output)
 {
-    size_t num_blocks = length_plain / 16 + 1;
-    //size_t new_length = num_blocks * 16;
-    std::vector<Block> nettle_output;
-    nettle_output.reserve(num_blocks);
-    struct aes128_ctx context;
-    aes128_set_encrypt_key(&context, key.data());
-    cbc_encrypt(&context, &aes128_encrypt, 16, iv.data(), length,
-                nettle_output[0].data(), input[0].data());
-                
-    g_assert_cmpmem(dumbaes_output[0].data(), 16*num_blocks, nettle_output[0].data(),
-                    16*num_blocks);            
+    
 }    
 
 static void test_encryption_decrypt()
 {
     // 10000 runs and the output is still instantaneous... AES is fast.
     // 100000 runs and it takes a little while to finish.
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 10000; i++) {
         Block input = {random_byte(), random_byte(), random_byte(), random_byte(),
                        random_byte(), random_byte(), random_byte(), random_byte(),
                        random_byte(), random_byte(), random_byte(), random_byte(),
@@ -377,43 +366,6 @@ static void test_encryption_decrypt()
 
         // Verify that our result is the same as what nettle gives.
         Block ciphertext = encrypt_block(input, key);
-        test_nettle_comparison_cbc(input, key, 160, iv, ciphertext);
-
-        // Verify that our decrypted result is the same as what we passed in.
-        Block plaintext = decrypt_cbc(ciphertext, 160, key, iv);
-        for (int j = 0; j < 10; j++)
-            for (int k = 0; k < 16; k++)
-                g_assert_cmphex(input[j][k], ==, plaintext[j][k]);
-    }
-}
-
-static void test_cbc_encryption_decrypt()
-{
-    // 10000 runs and the output is still instantaneous... AES is fast.
-    // 100000 runs and it takes a little while to finish.
-    for (int i = 0; i < 1000; i++) {
-        std::vector<Block> input;
-        for(int j = 0; j < 10; j++) {
-            Block input_block = {random_byte(), random_byte(), random_byte(), 
-                                 random_byte(), random_byte(), random_byte(),
-                                 random_byte(), random_byte(), random_byte(), 
-                                 random_byte(), random_byte(), random_byte(),
-                                 random_byte(), random_byte(), random_byte(), 
-                                 random_byte()};
-            input.pushback( input_block );               
-        }
-        Block iv = {random_byte(), random_byte(), random_byte(), random_byte(),
-                    random_byte(), random_byte(), random_byte(), random_byte(),
-                    random_byte(), random_byte(), random_byte(), random_byte(),
-                    random_byte(), random_byte(), random_byte(), random_byte()};
-
-        Key key = {random_byte(), random_byte(), random_byte(), random_byte(),
-                   random_byte(), random_byte(), random_byte(), random_byte(),
-                   random_byte(), random_byte(), random_byte(), random_byte(),
-                   random_byte(), random_byte(), random_byte(), random_byte()};
-
-        // Verify that our result is the same as what nettle gives.
-        std::vector<Block> ciphertext = encrypt_cbc(input, 160, key, iv);
         test_nettle_comparison(input, key, ciphertext);
 
         // Verify that our decrypted result is the same as what we passed in.
@@ -453,7 +405,6 @@ int main(int argc, char* argv[])
     g_test_add_func("/Encryption/state", test_encryption_state);
     g_test_add_func("/Encryption/decrypt", test_encryption_decrypt);
     g_test_add_func("/Encryption/c_api", test_c_api);
-    g_test_add_func("/Encryption/cbc", test_cbc_encryption_decrypt);
 
     return g_test_run();
 }

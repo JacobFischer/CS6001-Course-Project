@@ -345,7 +345,7 @@ static void test_nettle_comparison_cbc(const std::vector<Block>& input,
     nettle_output.reserve(num_blocks);
     struct aes128_ctx context;
     aes128_set_encrypt_key(&context, key.data());
-    cbc_encrypt(&context, &aes128_encrypt, 16, iv.data(), length,
+    cbc_encrypt(&context, &aes128_encrypt, 16, iv.data(), length_plain,
                 nettle_output[0].data(), input[0].data());
                 
     g_assert_cmpmem(dumbaes_output[0].data(), 16*num_blocks, nettle_output[0].data(),
@@ -389,7 +389,7 @@ static void test_cbc_encryption_decrypt()
                                  random_byte(), random_byte(), random_byte(),
                                  random_byte(), random_byte(), random_byte(), 
                                  random_byte()};
-            input.pushback(input_block);               
+            input.push_back(input_block);               
         }
         Block iv = {random_byte(), random_byte(), random_byte(), random_byte(),
                     random_byte(), random_byte(), random_byte(), random_byte(),
@@ -407,7 +407,7 @@ static void test_cbc_encryption_decrypt()
         test_nettle_comparison_cbc(input, key, 160, iv, ciphertext);
 
         // Verify that our decrypted result is the same as what we passed in.
-        syd::vector<Block> plaintext = decrypt_cbc(ciphertext, length, key, iv);
+        std::vector<Block> plaintext = decrypt_cbc(ciphertext, length, key, iv);
         for (int j = 0; j < 10; j++)
             for (int k = 0; k < 16; k++)
                 g_assert_cmphex(input[j][k], ==, plaintext[j][k]);     

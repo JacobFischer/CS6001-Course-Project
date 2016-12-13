@@ -338,21 +338,25 @@ static void test_nettle_comparison(const Block& input,
 static void test_nettle_comparison_cbc(const std::vector<Block>& input,
                                        const Key& key,
                                        const size_t& length_plain,
-                                       Block& iv,
+                                       const Block& iv,
                                        const std::vector<Block>& dumbaes_output)
 {
     size_t num_blocks = length_plain / 16 + 1;
+    Block iv_copy;
+    std::memcpy(iv_copy.data(), iv.data(), 16);
     std::vector<Block> nettle_output;
     nettle_output.reserve(num_blocks);
     struct aes128_ctx context;
     aes128_set_encrypt_key(&context, key.data());
-    cbc_encrypt(&context, &aes128_encrypt, AES_BLOCK_SIZE, iv.data(), length_plain,
+    cbc_encrypt(&context, (nettle_cipher_func*)&aes128_encrypt, AES_BLOCK_SIZE, 
+                iv_copy.data(), length_plain,
                 nettle_output[0].data(), input[0].data() );
                
-    /*
-    g_assert_cmpmem(dumbaes_output[0].data(), 16*num_blocks, nettle_output[0].data(),
-                    16*num_blocks);
-    */                
+    
+    //Appears that nettle uses different padding on last block
+    g_assert_cmpmem(dumbaes_output[0].data(), 16*(num_blocks-1), 
+                    nettle_output[0].data(), 16*(num_blocks-1));
+                   
 }    
 
 static void test_encryption_decrypt()
@@ -383,7 +387,7 @@ static void test_encryption_decrypt()
 
 static void test_cbc_encryption_decrypt()
 {
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 1000; i++) {
         std::vector<Block> input;
         for (int j = 0; j < 10; j++) {
             Block input_block = {random_byte(), random_byte(), random_byte(), 
@@ -411,9 +415,10 @@ static void test_cbc_encryption_decrypt()
 
         // Verify that our decrypted result is the same as what we passed in.
         std::vector<Block> plaintext = decrypt_cbc(ciphertext, length, key, iv);
+        
         for (int j = 0; j < 10; j++)
             for (int k = 0; k < 16; k++)
-                g_assert_cmphex(input[j][k], ==, plaintext[j][k]);     
+                g_assert_cmphex(input[j][k], ==, plaintext[j][k]);
     }
 }
 
